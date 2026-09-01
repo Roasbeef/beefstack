@@ -248,12 +248,20 @@ subjective" but far from "entirely subjective."
   grouping.
 - **Logical nesting of delimiters.** Decries putting commas/periods inside quotation
   marks regardless of sense: "aesthetic habit should be trumped by logic."
-- **Em-dashes, colons, block quotations = attention tools.** "The deliberate use of
-  surprising transitions — colons, dashes, block quotations — is one of the
-  hallmarks of lively prose." Use dashes/colons to group a parenthetical or
-  spotlight what follows.
+- **Colons, semicolons, block quotations, and the sentence break = attention
+  tools.** Pinker: "The deliberate use of surprising transitions... is one of the
+  hallmarks of lively prose." Use a colon to spotlight what follows, a semicolon to
+  join closely related clauses, and a full stop to give a claim its own frame.
+  > **Voice override — em-dashes.** Pinker names the em-dash first among these
+  > marks. `roasbeef-prose` bans it absolutely, with no exceptions, and the voice
+  > skill wins on any conflict. So the dash is deliberately absent from the list
+  > above and from every example in this skill. This is a standing override, not
+  > an oversight: do not "restore" the dash as a fidelity fix to Pinker. Reach for
+  > the colon, the semicolon, the comma, or a new sentence instead.
 - **Semicolon** — the most underrated mark; joins closely related independent
-  clauses and fixes would-be comma splices.
+  clauses and fixes would-be comma splices. Google's guide advises avoiding it;
+  that advice is **not** adopted here, because combined with the em-dash ban it
+  would leave no mid-sentence joining device at all.
 - **Possessives by logic:** *Charles's son*, not *Charles' son*.
 
 ## Encoding cheat-sheet
@@ -274,7 +282,7 @@ subjective" but far from "entirely subjective."
 | Officialese coffin | "for the purpose of", "at this point in time" | Substitute plain phrase (table) | Register genuinely requires it |
 | Metaconcept | level, perspective, framework, model, process, issue | Strip packaging; name the act/object | When the meta-level is the real subject |
 | Intensifier/tic | very, really, actually, basically | Single vivid word, or cut | Genuine degree distinction |
-| Parsing punctuation | comma splice, missing serial comma | Fix splice; serial comma; dash/colon for grouping | — |
+| Parsing punctuation | comma splice, missing serial comma | Fix splice; serial comma; colon/semicolon/new sentence for grouping (**not** the em-dash, see §9) | — |
 
 > **Above all rules:** is the prose a clean window onto the thing — or has it fogged
 > into talk about the text, the writer's caution, or an abstraction? Fix toward the

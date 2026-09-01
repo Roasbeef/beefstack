@@ -72,7 +72,7 @@ the reader's expertise.
 state under partition."
 **After:** "When two servers fall out of sync (for example, because the network
 split them apart), we compare their records field by field and keep the newer
-value for each — so both end up with the same data."
+value for each, so both end up with the same data."
 
 The before-sentence stacks three expert chunks; the after-sentence unpacks one
 level.

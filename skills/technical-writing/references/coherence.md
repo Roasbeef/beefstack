@@ -63,7 +63,7 @@ cortisol.* — the known player is the subject; the new cause lands last.
 Move a phrase to the front to mark it as the topic, even when it's grammatically
 an object:
 Before: *I will never forget the day I first saw the Pacific.*
-After: *That day — the day I first saw the Pacific — I will never forget.*
+After: *That day, the day I first saw the Pacific, I will never forget.*
 
 ## Topic strings — keep one consistent subject
 
@@ -136,7 +136,7 @@ Is sentence 2 a result or a coincidence? Is sentence 4 a result of 3, or a
 
 **After (connectives restored):**
 > The cache was cold, **so** latency tripled. We **therefore** added a warm-up
-> phase — **but** p99 stayed flat.
+> phase, **but** p99 stayed flat.
 
 The *but* signals violated expectation: the fix didn't work, which is the whole
 point.
