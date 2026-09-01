@@ -1,4 +1,4 @@
-# Claude Code Configuration
+# beefstack
 
 An advanced Claude Code setup with specialized sub-agents, skills, custom commands, automated hooks, session management, and inter-agent messaging via Subtrate. Tailored for complex software engineering workflows, particularly Bitcoin/Lightning Network development.
 
@@ -223,7 +223,7 @@ Subtrate is the **primary channel for reaching the user** and coordinating work 
 
 1. Clone to your home directory:
    ```bash
-   cd ~ && git clone <repository-url> .claude
+   cd ~ && git clone https://github.com/Roasbeef/beefstack.git .claude
    ```
 
 2. Make hook scripts executable:
