@@ -228,6 +228,13 @@ Prefer one stronger word:
   **crucial**; "very fast" → **rapid**.
 - "actually, basically, in fact, of course" as throat-clearing → **cut.**
 
+**A second family aims at the reader, not the claim:** *simply, easy, easily,
+just, quickly, obviously, it's that simple.* These are not intensifiers but
+assertions about the reader's mental state, and they are lose-lose: if the step is
+easy, the word adds nothing; if it isn't, the word tells the reader their
+difficulty is a personal failing. Delete the adjective. Reasoning and the fuller
+substitution table: `anti-density.md` §6.
+
 ## 9. Punctuation as a parsing aid
 
 Pinker treats punctuation as a cognitive tool for parsing and grouping, "somewhat
@@ -258,6 +265,12 @@ subjective" but far from "entirely subjective."
 | Metadiscourse/signposting | "in this section", "to sum up", "as noted above" | Cut advance roadmaps; use questions / "we"-summative | Sparse guidance in long, complex passages |
 | Hedging | somewhat, fairly, apparently, in part, presumably | Cut; trust the reader | When it carries real scope/precision |
 | Cliché / mixed metaphor | stock idioms; stacked dead figures | Freshen, invert, or make concrete | Inverted/twisted cliché with poetic charge |
+| **Invented metaphor** | "think of X as", "is like", "acts like", "imagine" | Discriminate vocabulary from invention; delete-and-reread (`anti-density.md` §1) | Established field vocabulary; a survivor with its limit sentence written |
+| **Anthropomorphism** | tells, sees, wants, knows, decides | Swap in the mechanical verb (`anti-density.md` §4) | Lexicalized terms of art (deadlock, starvation, listener) |
+| **Performance** | Delete it: only a feeling disappears | Flatten to the fact underneath (`anti-density.md` §5) | — |
+| **Condescension** | simply, easily, just, quickly, obviously | Delete the adjective; show ease, don't assert it | — |
+| **`should`** | the token itself | Route to must / we recommend / plain fact / can | — |
+| **Bare demonstrative** | "This means…", "This approach…" as a subject | Follow it with its noun | — |
 | Officialese coffin | "for the purpose of", "at this point in time" | Substitute plain phrase (table) | Register genuinely requires it |
 | Metaconcept | level, perspective, framework, model, process, issue | Strip packaging; name the act/object | When the meta-level is the real subject |
 | Intensifier/tic | very, really, actually, basically | Single vivid word, or cut | Genuine degree distinction |
