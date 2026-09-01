@@ -174,9 +174,70 @@ ambiguous attachment (low-attachment bias makes the reader guess, often wrong).
 | a server-side request forgery vulnerability scan report | a report **on scanning for** server-side request-forgery vulnerabilities |
 | customer account fraud detection rule engine | the rule engine **that detects fraud in** customer accounts |
 
-> Cap modifier stacks at ~2–3 before a head noun. Break longer piles apart with
-> prepositions and relative clauses (*of, for, that, involving*) that make
-> attachment explicit and let the head noun arrive sooner.
+> **Cap noun-modifier stacks at exactly two.** Google states the hard number:
+> "Don't use more than two nouns as modifiers of another noun." Break longer piles
+> apart with prepositions and relative clauses (*of, for, that, involving*) that
+> make attachment explicit and let the head noun arrive sooner.
+>
+> *(The cap of two governs nouns modifying a noun. Adjectives are looser; use
+> judgment, and let the memory argument above decide.)*
+>
+> **Exception: the field's own compound name for a thing.** *HTLC timeout
+> transaction*, *channel funding transaction*, and *segregated witness commitment*
+> are standard multi-noun terms, not piles you assembled. Paraphrasing them into
+> prepositions ("the transaction for the timeout of the HTLC") produces
+> non-standard renderings of correct jargon, which is worse for the reader, not
+> better. The cap targets **stacks you built yourself** out of ordinary nouns. If
+> the stack is what the specification calls the thing, keep it.
+
+## When has a sentence gone unruly? The counters
+
+Rule 10 below is the universal escape hatch, but it gives no threshold. These do.
+None of them decides anything on its own; each one **forces the judgment** the
+rest of this file describes.
+
+| Trigger | Threshold | Action |
+|---|---|---|
+| **Independent** clauses, each with its own subject | **≥ 3** | Presumptively three ideas in one sentence. Split. |
+| Word count | **> 30** | A smoke alarm only. Stop and run the clause count. |
+| The period test | A period could stand at **≥ 2** points, leaving complete sentences | Split. |
+| Nouns modifying a noun | **> 2** | Explode the pile with prepositions. |
+
+**Count subjects, not verbs.** Coordinate predicates under one subject ("the
+reconciler watches X, diffs Y, and issues Z") are one idea with three parts, and
+splitting them would break the topic string `coherence.md` asks you to hold. The
+trigger hunts **subject-hopping**: three different actors welded into one
+sentence.
+
+Word count alone decides nothing: a 35-word sentence with one idea in a
+right-branching tail is fine, and a 20-word sentence hopping between three
+subjects is not. Google's own formulation of the target is "focus each sentence on
+a single idea, thought, or concept," and these counters are proxies for it.
+
+Full procedure, including where a list is hiding inside a long sentence:
+`anti-density.md` §2.
+
+## The one exception to end-weight: gating clauses
+
+Google's sentence-structure page tells writers to put a condition or goal
+**first**: "Mentioning the circumstance first lets the reader skip the instruction
+if it doesn't apply."
+
+> Before: "Restart the consensus node if the quorum certificate failed to verify."
+>
+> After: "If the quorum certificate failed to verify, restart the consensus node."
+
+**This is a scannability rule, not a weight rule, and it is narrowly scoped.**
+Google's own example ("To delete the entire document, click Delete") front-loads
+the *heavier* clause, which is the opposite of end-weight. It applies to
+**imperative instructions, applicability gates, and cross-reference lead-ins**
+("For more information, see X") in reference and procedural documentation, where
+the reader is scanning to find out whether a passage applies to them at all.
+
+It does **not** override end-weight in narrative or expository prose. In a PR
+body, a commit message, a design doc, or an essay, the rules above stand: a heavy
+constituent goes last, and a front-loaded subordinate clause holds the main clause
+hostage.
 
 ## The encodable rule set
 
@@ -191,6 +252,10 @@ ambiguous attachment (low-attachment bias makes the reader guess, often wrong).
 6. **Subject ↔ verb proximity** — don't wedge long material between bound words.
 7. **Order conventions** — topic→comment, given→new, light→heavy, short→long.
 8. **Parallel meaning → parallel syntax** — don't vary structure capriciously.
-9. **Cap modifier stacks (~2–3)** — explode noun piles with prepositions/relative
-   clauses.
+9. **Cap noun-modifier stacks at two** — explode noun piles with
+   prepositions/relative clauses.
 10. **When in doubt, split the sentence in two** — the universal escape hatch.
+11. **Know when "in doubt" has arrived** — ≥3 finite-verb clauses, or a period
+    that could stand at ≥2 points. >30 words is a smoke alarm, not a verdict.
+12. **Short gating clause first, heavy constituent last** — and only in
+    instructions, applicability gates, and cross-references, never in narrative.
