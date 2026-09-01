@@ -1,6 +1,57 @@
 # beefstack
 
-An advanced Claude Code setup with specialized sub-agents, skills, custom commands, automated hooks, session management, and inter-agent messaging via Subtrate. Tailored for complex software engineering workflows, particularly Bitcoin/Lightning Network development.
+A Claude Code configuration built up over a year of daily use, mostly on Bitcoin
+and Lightning Network work. Skills, sub-agents, hooks, session continuity, and
+inter-agent messaging, arranged so that long and unglamorous engineering tasks
+survive context compaction and can be handed to a fleet rather than done one
+prompt at a time.
+
+It is a working setup rather than a demo. Everything here earned its place by
+being used, and the usage numbers below are measured from the local transcripts
+rather than estimated.
+
+## How it actually gets used
+
+Measured across 8,743 session transcripts spanning 279 projects, from 2025-09-28
+to 2026-09-01. That is 31,891 prompts over 338 days, or roughly 94 a day.
+
+Skills are invoked 1,355 times. The distribution is lopsided in a way worth
+noting: a handful of skills carry most of the load, and they are the ones that
+handle the parts of the job nobody enjoys.
+
+| Skill | Invocations | What it carries |
+|-------|------------:|-----------------|
+| `substrate` | 326 | Agent mail, status, review requests |
+| `roasbeef-prose` | 237 | Voice for commits, PRs, docs |
+| `incremental-commit` | 188 | Splitting a diff into atomic commits |
+| `differential-review` | 58 | Security-focused review of a change |
+| `sharp-edges` | 49 | Footgun and misuse-resistance audit |
+| `insecure-defaults` | 47 | Fail-open configuration hunting |
+| `resolve-pr-comments` | 47 | Working through review feedback |
+| `session-*` | 63 | Init, resume, and logging across compaction |
+| `agent-browser` | 37 | Driving a real browser |
+| `technical-writing` | 34 | Clarity pass, distinct from voice |
+| `hunk` | 25 | Line-level staging and non-interactive rebase |
+| `advisor` + `advisor-review` | 34 | Escalating a judgment call to a stronger model |
+
+Sub-agents run far more often than skills do, because most real work fans out:
+
+| Agent | Spawns |
+|-------|-------:|
+| `general-purpose` | 1,175 |
+| `Explore` | 592 |
+| `code-reviewer` | 202 |
+| `security-auditor` | 168 |
+| `function-analyzer` | 118 |
+| `spec-compliance-checker` | 49 |
+| `Plan` | 42 |
+
+Two things stand out. The writing skills are near the top, which is not what you
+would guess from a list of engineering tools, but a commit message or a PR
+description is written on nearly every task. And review runs adversarially by
+default: `code-reviewer`, `security-auditor`, `differential-review`,
+`sharp-edges`, and `insecure-defaults` together account for more invocations
+than any single feature-building workflow.
 
 ## Architecture
 
@@ -8,44 +59,42 @@ An advanced Claude Code setup with specialized sub-agents, skills, custom comman
 graph TB
     Main[Claude Code Core]
 
-    subgraph NativeTools["Native Tools"]
+    subgraph Writing["Writing"]
         direction LR
-        NT1[TaskCreate/Update/List]
-        NT2[Read/Write/Edit]
-        NT3[Bash/Grep/Glob]
+        W1[roasbeef-prose]
+        W2[technical-writing]
+        W3[incremental-commit]
     end
 
-    subgraph Skills["Skills"]
+    subgraph Review["Review &amp; Security"]
         direction LR
-        S1[lnd]
-        S2[eclair]
-        S3[substrate]
-        S4[nano-banana]
-        S5[mutation-testing]
-        S6[frontend-design]
+        R1[differential-review]
+        R2[sharp-edges]
+        R3[insecure-defaults]
+        R4[variant-analysis]
+        R5[review-loop]
     end
 
-    subgraph Agents["Sub-Agents"]
+    subgraph Testing["Testing"]
         direction LR
-        AA[Arch Archaeologist]
-        CS[Code Scout]
-        CR[Code Reviewer]
-        SA[Security Auditor]
-        TE[Test Engineer]
-        DD[Doc Checker]
-        GD[Go Debugger]
-        DC2[Debug Chronicler]
-        MT[Mutation Tester]
-        PB[Presentation Builder]
+        T1[property-based-testing]
+        T2[mutation-testing]
+        T3[test-refine]
     end
 
-    subgraph Commands["Custom Commands"]
+    subgraph Escalation["Escalation"]
         direction LR
-        IC[Incremental Commit]
-        PR[Pre-PR Review]
-        TF[Test Forge]
-        QD[Quick Dive]
-        ID[Ideate]
+        E1[advisor]
+        E2[advisor-review]
+        E3[orchestrate]
+    end
+
+    subgraph Domain["Bitcoin / Lightning"]
+        direction LR
+        D1[lnd]
+        D2[eclair]
+        D3[lnget]
+        D4[go-debug]
     end
 
     subgraph Infra["Infrastructure"]
@@ -55,94 +104,162 @@ graph TB
         Hooks[Hook System]
     end
 
-    Main --> NativeTools
-    Main ==> Skills
-    Main ==> Agents
-    Main ==> Commands
+    Main ==> Writing
+    Main ==> Review
+    Main ==> Testing
+    Main ==> Escalation
+    Main ==> Domain
     Infra -.->|lifecycle| Main
 
     classDef core fill:#e1bee7,stroke:#4a148c,stroke-width:3px,color:#000
-    classDef agents fill:#c5cae9,stroke:#1a237e,stroke-width:2px,color:#000
-    classDef commands fill:#b2dfdb,stroke:#004d40,stroke-width:2px,color:#000
-    classDef hooks fill:#ffccbc,stroke:#bf360c,stroke-width:2px,color:#000
-    classDef tools fill:#fff9c4,stroke:#f57f17,stroke-width:2px,color:#000
-    classDef skills fill:#dcedc8,stroke:#33691e,stroke-width:2px,color:#000
+    classDef writing fill:#dcedc8,stroke:#33691e,stroke-width:2px,color:#000
+    classDef review fill:#ffccbc,stroke:#bf360c,stroke-width:2px,color:#000
+    classDef testing fill:#fff9c4,stroke:#f57f17,stroke-width:2px,color:#000
+    classDef escalation fill:#c5cae9,stroke:#1a237e,stroke-width:2px,color:#000
+    classDef domain fill:#b2dfdb,stroke:#004d40,stroke-width:2px,color:#000
+    classDef infra fill:#f8bbd0,stroke:#880e4f,stroke-width:2px,color:#000
 
     class Main core
-    class AA,CS,CR,SA,TE,DD,GD,DC2,MT,PB agents
-    class IC,PR,TF,QD,ID commands
-    class Sub,Ses,Hooks hooks
-    class NT1,NT2,NT3 tools
-    class S1,S2,S3,S4,S5,S6 skills
+    class W1,W2,W3 writing
+    class R1,R2,R3,R4,R5 review
+    class T1,T2,T3 testing
+    class E1,E2,E3 escalation
+    class D1,D2,D3,D4 domain
+    class Sub,Ses,Hooks infra
 ```
 
 ## Skills
 
-Domain-specific toolkits invoked via `/skill-name`:
+Thirty skills, grouped by what they are for. Most are model-invoked when the task
+matches; a few are deliberately opt-in only.
+
+### Writing
 
 | Skill | Description |
 |-------|-------------|
-| `lnd` | Lightning Network Daemon - Docker containers, RPC endpoints, channel management |
-| `eclair` | ACINQ's Eclair - Docker containers, API endpoints, payment channels |
-| `substrate` | Agent mail system - inbox, send, reply, identity management |
-| `nano-banana` | AI image generation via Gemini/Imagen 3 |
-| `mutation-testing` | Validate test quality through mutation analysis |
-| `frontend-design` | Production-grade UI components with high design quality |
-| `slide-creator` | Transform written content into slide deck images |
-| `skill-creator` | Meta-skill for creating new skills |
-| `lnget` | Lightning Network data retrieval |
+| `roasbeef-prose` | The voice: cadence, idioms, "In this commit, we...". Wins over clarity rules on any conflict |
+| `technical-writing` | The clarity layer, from Pinker plus Google's style guide. Counters against dense prose, invented metaphors, and writing that performs |
+| `incremental-commit` | Carve a diff into atomic commits, each with a message that explains why |
+| `slide-creator` | Written content into slide images |
+| `explainer-video` | Script to voiceover to rendered mp4 |
 
-## Sub-Agents
+### Review and security
 
-Specialized agents that run in separate context windows for deep analysis:
+The first three come from the [Trail of Bits plugin](https://github.com/trailofbits/claude-plugins)
+rather than from `skills/`, and together they are the most-used review path here.
+
+| Skill | Description |
+|-------|-------------|
+| `differential-review` | Security-focused review of a diff, with blast radius and regression checks |
+| `sharp-edges` | Footgun APIs, dangerous configuration, misuse-resistance |
+| `insecure-defaults` | Fail-open defaults and hardcoded secrets |
+| `variant-analysis` | Find more instances of a bug you just found |
+| `review-loop` | Adversarial review, triage, and fix until a cold verifier signs off |
+| `agentic-code-reasoner` | Execution-free deep analysis with a reasoning certificate |
+
+### Testing
+
+| Skill | Description |
+|-------|-------------|
+| `property-based-testing` | Invariant-driven tests, `rapid` for Go |
+| `mutation-testing` | Validate test strength by mutating the code under test |
+| `test-refine` | Cut trivial tests, strengthen weak assertions, close branch gaps |
+| `agent-ci` | Run GitHub Actions locally before pushing |
+| `ci-loop` | Watch a CI run to completion, classify failures, remediate |
+
+### Escalation and orchestration
+
+| Skill | Description |
+|-------|-------------|
+| `advisor` | Consult a stronger model on a judgment call from a cheaper session |
+| `advisor-review` | Final adversarial audit of finished work |
+| `orchestrate` | Expensive planner decomposes, cheap workers execute in parallel, planner synthesizes |
+
+### Bitcoin and Lightning
+
+| Skill | Description |
+|-------|-------------|
+| `lnd` | Lightning Network Daemon in Docker, RPC, channels, regtest |
+| `eclair` | ACINQ's Eclair in Docker, API, payment channels |
+| `lnget` | Fetch L402-protected URLs that require Lightning payments |
+| `go-debug` | Interactive Delve debugging driven through tmux |
+
+### Tooling
+
+| Skill | Description |
+|-------|-------------|
+| `substrate` | Agent mail, identity, review requests |
+| `hunk` | Line-level staging and non-interactive rebase |
+| `agent-browser` | Browser and Electron automation |
+| `agent-cli` | Design and review CLIs meant for agents to consume |
+| `frontend-design` | Distinctive production-grade UI |
+| `shadcn` | shadcn/ui components and registries |
+| `nano-banana` | Image generation and editing via Gemini |
+| `litbucket` | Publish static artifacts to an internal address |
+| `herdr` | Terminal multiplexer control for coding agents |
+| `skill-creator` | Meta-skill for writing new skills |
+
+## Sub-agents
+
+Specialized agents that run in their own context window, so a deep investigation
+does not consume the main loop's budget.
 
 | Agent | Purpose |
 |-------|---------|
-| Architecture Archaeologist | Comprehensive codebase analysis with Mermaid diagrams |
-| Code Scout | Fast targeted analysis (2-3 min), max 10 files |
-| Code Reviewer | PR and code change review with pattern analysis |
-| Security Auditor | Vulnerability identification and security hardening |
+| Architecture Archaeologist | Codebase analysis with Mermaid diagrams |
+| Code Scout | Fast targeted analysis, time-boxed |
+| Code Reviewer | PR review tuned for Bitcoin and Lightning p2p code |
+| Security Auditor | Vulnerability hunting with proof-of-concept development |
 | Test Engineer | Test generation with property-based testing and fuzzing |
-| Documentation Double-Checker | Verify documentation accuracy against codebase |
-| Go Debugger | Interactive debugging with Delve and tmux |
-| Debug Chronicler | Transform debugging sessions into structured runbooks |
-| Mutation Tester | Mutation testing for code quality verification |
-| Presentation Builder | Slide creation and presentation design |
+| Documentation Double-Checker | Verify docs against the actual code |
+| Go Debugger | Delve and tmux |
+| Debug Chronicler | Turn a debugging session into a runbook |
+| Mutation Tester | Mutation analysis for test quality |
+| Design Iterator | Screenshot, analyze, improve, repeat |
 
-## Custom Commands
+## Subtrate and mission control
 
-Reusable workflows invoked by name:
+[Subtrate](https://github.com/roasbeef/subtrate) is the command center for
+running more than one agent at a time. It solves the two problems that make
+multi-agent work painful: agents cannot talk to each other, and they lose their
+identity when context compacts.
 
-| Category | Commands |
-|----------|----------|
-| **Analysis** | `/quick-dive`, `/code-deep-dive`, `/code-review`, `/focused-review` |
-| **Testing** | `/test-forge`, `/fuzz-test`, `/mutation-testing` |
-| **Review** | `/pre-pr-review`, `/batch-review`, `/security-review`, `/security-audit` |
-| **Git** | `/incremental-commit`, `/resolve-pr-comments` |
-| **Planning** | `/ideate`, `/issue-plan` |
-| **Docs** | `/doc-check`, `/chronicle-fix` |
-| **Sessions** | `/session-init`, `/session-resume`, `/session-log`, `/session-checkpoint`, `/session-pause`, `/session-close`, `/session-view` |
+This is the piece beefstack pairs with most closely, and `substrate` is the
+single most-invoked skill here at 326 calls.
 
-## Hooks
+### Mission control mode
 
-Shell scripts that execute at Claude Code lifecycle events:
+The web UI at `http://localhost:8080` is a zoomable canvas rather than a list.
+Every running agent is a card you can pan and zoom around, Prezi style. From
+there you can watch agents work in real time, read and answer their mail, drop a
+screenshot or mockup straight onto a card so it arrives in that agent's inbox,
+and see who is active, idle, or offline at a glance.
 
-### Substrate Hooks (Agent Messaging)
-- **SessionStart**: Heartbeat + inject unread messages
-- **UserPromptSubmit**: Silent heartbeat + check for new mail
-- **Stop**: Long-poll 9m30s, keep agent alive for inter-agent work
-- **SubagentStop**: One-shot mail check, then allow exit
-- **PreCompact**: Save identity for restoration after compaction
+That matters once a task is fanned out across a fleet. Instead of tabbing
+between terminals and losing track of which agent is blocked on what, the whole
+run is one board. Agents that need a decision surface it as mail; you answer
+from the canvas; they carry on. Reviews requested with `substrate review request`
+land there too, so the review cycle happens on the same surface as the work.
 
-### Context Hooks
-- **SessionStart** (`load_project_context.sh`): Load project context and active sessions
-- **UserPromptSubmit** (`context_enhancer.py`): Add intelligent context based on keywords
-- **UserPromptSubmit** (`ultrathink_hook.py`): Enhanced reasoning when prompt ends with `-u`
-- **PreCompact** (`save_important_context.sh`): Archive context before compaction
+### Core mechanics
 
-## Session Management
+- **Identity**: persistent codenames in the form `CodeName@project.branch`,
+  auto-generated on first use and restored across compaction by the
+  PreCompact and SessionStart hook pair.
+- **Mail**: async threaded messaging with priorities, per-recipient state, and
+  full-text search. `substrate send-diff` posts a branch diff with syntax
+  highlighting; `--attach` embeds an image inline.
+- **Liveness**: heartbeats on session start, prompt submit, and during stop
+  polling, giving active, idle, and offline status.
 
-Sessions provide execution continuity across context compactions. When Claude's context window compacts, sessions preserve progress, decisions, and discoveries for seamless resumption.
+Subtrate is the primary channel for reaching a human outside a blocking prompt.
+Status updates go through `substrate send` rather than to a console nobody is
+watching.
+
+## Session management
+
+Sessions preserve progress, decisions, and discoveries across context
+compaction, so a long task resumes instead of restarting.
 
 ```
 /session-init  ->  (active work)  ->  /session-close --complete
@@ -152,74 +269,52 @@ Sessions provide execution continuity across context compactions. When Claude's 
                /session-resume
 ```
 
-Key features:
-- Per-project session tracking in `.sessions/` directories
-- Automatic state preservation via PreCompact hook
+- Per-project tracking in `.sessions/` directories
+- Automatic state preservation via the PreCompact hook
 - Structured logging: progress, decisions, discoveries, blockers
 - Full documentation in [SESSIONS.md](SESSIONS.md)
 
-## Subtrate Agent Messaging
+## Hooks
 
-[Subtrate](https://github.com/roasbeef/subtrate) is a command center for orchestrating multiple Claude Code agents. It solves two fundamental problems with Claude Code agents: **isolation** (agents have no way to communicate with each other) and **ephemerality** (agents lose identity and context when compaction occurs).
+Shell scripts bound to Claude Code lifecycle events. These are what make
+identity and session continuity work without the model having to remember.
 
-### Core Components
+### Substrate hooks
 
-- **Substrated Daemon**: gRPC server (port 10009) + REST gateway + WebSocket hub + embedded Web UI
-- **Substrate CLI**: Command-line client for mail operations, identity management, and polling
-- **Hook Scripts**: Shell scripts in `~/.claude/hooks/substrate/` that integrate with Claude Code's lifecycle
+- **SessionStart**: heartbeat, inject unread mail
+- **UserPromptSubmit**: silent heartbeat, check for new mail
+- **Stop**: long-poll, keeping the agent alive for inter-agent work
+- **SubagentStop**: one-shot mail check, then exit
+- **PreCompact**: save identity for restoration afterward
 
-### Key Features
+### Context hooks
 
-- **Agent Identity**: Persistent, memorable codenames (e.g., "NobleLion", "SilverWolf") auto-generated on first use. Format: `CodeName@project.branch`. Survives across context compactions via PreCompact/SessionStart hook pair.
-- **Mail System**: Async messaging between agents with thread-based conversations, priorities (urgent/normal/low), and per-recipient state tracking (inbox/archived/trash). Full-text search on message content.
-- **Persistent Agent Pattern**: The Stop hook always outputs `{"decision": "block"}`, keeping the agent alive indefinitely. It long-polls for 9m30s checking for new messages, then loops. This means agents stay running and responsive to mail from other agents. Press Ctrl+C to force exit.
-- **Web UI**: Real-time dashboard at http://localhost:8080 with agent status, activity feed, unread counts, and inbox management. WebSocket-powered live updates.
-- **Heartbeat Tracking**: Agent liveness monitoring with status levels: active (<5min), idle (5-30min), offline (>30min). Heartbeats sent automatically by hooks on session start, prompt submit, and during stop polling.
+- **SessionStart** (`load_project_context.sh`): load project context and active sessions
+- **UserPromptSubmit** (`context_enhancer.py`): inject context based on keywords
+- **PreCompact** (`save_important_context.sh`): archive context before compaction
 
-### How Agents Communicate
-
-```
-Agent A starts -> SessionStart hook sends heartbeat, checks inbox
-Agent A works  -> UserPromptSubmit hook sends heartbeat on each prompt
-Agent A idles  -> Stop hook long-polls, discovers message from Agent B
-                  -> Agent A reads mail, processes request, replies
-Agent B sends  -> substrate send --to AgentA --subject "..." --body "..."
-                  -> Message stored in SQLite, NotificationHub notifies
-```
-
-Subtrate is the **primary channel for reaching the user** and coordinating work across agents. When you need to send a status update or communicate asynchronously, use `substrate send` rather than just printing to the console.
-
-## Directory Structure
+## Directory structure
 
 ```
 ~/.claude/
 ├── CLAUDE.md              # Global instructions for all projects
 ├── README.md              # This file
 ├── SESSIONS.md            # Session system documentation
-├── settings.json          # Hooks, permissions, sandbox config
-├── agents/                # Sub-agent definitions (10 agents)
-├── commands/              # Custom command definitions
-├── skills/                # Skill definitions (9 skills)
-│   ├── lnd/
-│   ├── eclair/
-│   ├── substrate/
-│   ├── nano-banana/
-│   ├── mutation-testing/
-│   ├── frontend-design/
-│   ├── slide-creator/
-│   ├── skill-creator/
-│   └── lnget/
-├── hooks/                 # Hook scripts
-│   ├── substrate/         # Agent messaging hooks
-│   ├── sessionstart/      # Session start hooks
-│   ├── precompact/        # Pre-compaction hooks
-│   └── userpromptsubmit/  # Prompt enhancement hooks
-├── projects/              # Per-project configurations
+├── settings.json          # Hooks, permissions, sandbox, model
+├── skills/                # 30 skills
+├── agents/                # 11 sub-agent definitions
+├── commands/              # Slash command definitions
+├── hooks/                 # Lifecycle hook scripts
+│   ├── substrate/         # Agent messaging
+│   ├── sessionstart/
+│   ├── precompact/
+│   └── userpromptsubmit/
+├── projects/              # Per-project state and transcripts
 ├── plans/                 # Plan files from planning sessions
-└── plugins/               # Plugin cache (LSPs, etc.)
+└── plugins/               # Plugin cache
 ```
 
-## Getting Started
+## Getting started
 
 1. Clone to your home directory:
    ```bash
@@ -236,6 +331,11 @@ Subtrate is the **primary channel for reaching the user** and coordinating work 
    substrate hooks install
    ```
 
-4. Review `settings.json` for hook paths, permissions, and sandbox configuration.
+4. Review `settings.json` for hook paths, permissions, model, and sandbox
+   configuration. Note that `permissions.defaultMode` is set to
+   `bypassPermissions` here, which suits a sandboxed personal setup and may not
+   suit yours.
 
-See the [Claude Code documentation](https://docs.anthropic.com/en/docs/claude-code/overview) for general setup and the [hooks guide](https://docs.anthropic.com/en/docs/claude-code/hooks-guide) for hook configuration.
+See the [Claude Code documentation](https://docs.anthropic.com/en/docs/claude-code/overview)
+for general setup and the [hooks guide](https://docs.anthropic.com/en/docs/claude-code/hooks-guide)
+for hook configuration.
