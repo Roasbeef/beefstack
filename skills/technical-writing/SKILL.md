@@ -1,13 +1,15 @@
 ---
 name: technical-writing
-description: Clear-writing guide distilled from Steven Pinker's "The Sense of Style." Use when writing or revising prose that must be clear to a reader — documentation, design docs, specs, explanations, essays, emails, reports, RFCs, release notes — or when asked to make writing clearer, tighter, less academic, or less jargon-laden. Activate for "make this clearer", "tighten this", "why is this hard to read", "edit this for clarity", or any prose-quality pass.
+description: Clear-writing guide distilled from Steven Pinker's "The Sense of Style," with mechanical checks from Google's developer documentation style guide. Use when writing or revising prose that must be clear to a reader — documentation, design docs, specs, explanations, essays, emails, reports, RFCs, release notes — or when asked to make writing clearer, tighter, less academic, or less jargon-laden. Activate for "make this clearer", "tighten this", "why is this hard to read", "edit this for clarity", or any prose-quality pass. Also activate when prose is dense, overwritten, or hard to parse on the first read: sentences packing three ideas, invented metaphors and analogies the reader must decode, anthropomorphized systems, or phrasing that shows off instead of informing.
 ---
 
 # Technical Writing (The Sense of Style)
 
 A practical guide to clear prose, distilled from Steven Pinker's *The Sense of
-Style: The Thinking Person's Guide to Writing in the 21st Century* (2014). The
-whole book reduces to one image and one cause, with four sets of consequences.
+Style: The Thinking Person's Guide to Writing in the 21st Century* (2014), with
+mechanical checks drawn from Google's developer documentation style guide. The
+book reduces to one image and one cause, with four sets of consequences; Google
+supplies the counters that turn them into something you can actually run.
 
 Use this when **drafting** prose (write it right the first time) or **revising**
 prose (run the revision pass at the bottom).
@@ -17,7 +19,7 @@ prose (run the revision pass at the bottom).
 This file is only the map. The substance of the skill — the decision rules, the
 tables, and the worked before/after rewrites you will actually apply — lives in
 the reference files. **Before drafting or revising a single sentence, Read all
-six**, in one batch of parallel Read calls:
+seven**, in one batch of parallel Read calls:
 
 1. `references/classic-style.md` — the window metaphor in full; the taxonomy of
    styles and when classic style may be broken
@@ -30,14 +32,25 @@ six**, in one batch of parallel Read calls:
 5. `references/mechanics.md` — the passive decision rule, the officialese
    substitution table, punctuation as a parsing aid
 6. `references/usage.md` — the myth-bust table and the real-rules table
+7. `references/anti-density.md` — **the counters.** The metaphor discriminator,
+   the sentence and paragraph thresholds, anthropomorphism, the show-off
+   taxonomy, and the rules deliberately overridden by voice
 
-They total about 1,100 lines, so reading all of them is cheap — and skipping
+They total about 1,600 lines, so reading all of them is cheap — and skipping
 any of them is the known failure mode of this skill. The section summaries
 below compress each file to a few bullets: enough to navigate, not enough to
 apply. An edit made from a summary alone (auto-converting every passive,
 stripping every hedge, "fixing" a usage superstition) is exactly the mechanical
 misapplication the references exist to prevent. Do not write or edit any prose
-until all six files are in context.
+until all seven files are in context.
+
+> **If you read only one thing before drafting, read `anti-density.md`.** Files
+> 1–6 describe what good prose is, and a strong model can satisfy every one of
+> them locally while still producing a paragraph no one can read on the first
+> pass. File 7 exists because that is *your* characteristic failure, not the
+> reader's: sentences welded from three ideas, a fresh metaphor coined mid-
+> paragraph that the reader must decode before reaching the claim, and phrasing
+> built to be admired rather than understood.
 
 ## The one image: prose is a window onto the world
 
@@ -166,12 +179,46 @@ your audience** (in a sticklerish context, observe even a superstition to avoid
 distracting the reader). Full myth-bust and real-rules tables:
 `references/usage.md`.
 
+## Consequence 5 — density: the counters that catch what judgment misses
+
+Consequences 1–4 describe what good prose is. You can satisfy all of them
+sentence by sentence and still hand the reader a paragraph they must read twice.
+This consequence exists because that is the specific way a strong model fails.
+
+- **Metaphor: discriminate, don't ban.** Field vocabulary (*handshake, leak,
+  tree, backpressure, mempool*) is dead metaphor doing plain work — use it
+  plainly. A frame you coin mid-paragraph is a live metaphor the reader must
+  decode before reaching your claim. **Delete it and reread: if no factual claim
+  went missing, it was decoration.** Any survivor needs its limit sentence.
+- **Count what you can't feel.** ≥3 finite-verb clauses in a sentence, ≥2 places a
+  period could stand, >2 nouns stacked before a head noun, 6 sentences in a
+  paragraph. Each is a trigger that forces a judgment, not a verdict.
+- **Strip perception, cognition, and desire from software.** *tells* → specifies,
+  *sees* → detects, *wants* → requires, *knows* → stores. Keep the lexicalized
+  terms of art (*deadlock, starvation, listener*), but don't let one become a
+  foothold for extending the personification.
+- **Performance is a smudge classic style doesn't name.** Elegant variation,
+  dropped aphorisms, escalating triads, "not X but Y" where nobody believed X,
+  and grandiosity. One test catches them all: **delete the sentence — does a fact
+  disappear, or only a feeling?**
+- **`simply`, `easily`, `just`, `obviously` are claims about the reader's mind,**
+  and they're lose-lose. Delete them.
+
+Counters, tables, worked rewrites, and the voice overrides:
+`references/anti-density.md`.
+
 ## The revision pass
 
 When revising existing prose, run these in order. Each maps to a reference file
 you have already read in full (see "Required first step" above); if any of the
-six is not in context, stop and Read it before continuing.
+seven is not in context, stop and Read it before continuing.
 
+0. **Organization before grammar.** Google states this for revising generated
+   text specifically: *"We recommend fixing organizational issues before editing
+   grammar and style issues."* A dense paragraph almost always has a structure bug
+   underneath it, and patching its sentences merely relocates the density to the
+   next one. If a paragraph trips the same check twice, rewrite the paragraph
+   instead of repairing the sentence. → anti-density
 1. **Window check (whole draft).** Where does the prose point at itself, the
    writer's caution, or an abstraction instead of the world? Cut metadiscourse
    ("In this section I will…"), apologies, professional narcissism. → classic-style
@@ -190,6 +237,43 @@ six is not in context, stop and Read it before continuing.
    officialese→plain table. → mechanics
 6. **Usage sweep.** Fix the real errors; stop "correcting" the superstitions;
    resolve disputes by clarity + audience. → usage
+7. **Density and performance sweep.** Run the counters, then the delete test.
+   → anti-density
+   - **Metaphor.** Grep for *think of X as / is like / acts like / imagine /
+     essentially a*. Run the discriminator on each hit: field vocabulary passes
+     untouched; an invented frame gets deleted and the paragraph reread. Any
+     survivor needs its "unlike a ___" limit sentence written.
+   - **Sentences.** Flag ≥3 finite-verb clauses, or a period that could stand at
+     ≥2 points. Split. Cap noun-modifier stacks at two.
+   - **Paragraphs.** At 6 sentences re-justify, at 8 split, without padding
+     sentences to dodge the count. Point in sentence 1.
+   - **Anthropomorphism.** Swap *tells / sees / wants / knows / decides* for the
+     mechanical verb, sparing lexicalized terms of art.
+   - **Performance.** For each candidate sentence: delete it. Does a fact
+     disappear, or only a feeling? Only a feeling means cut it.
+   - **Words.** Route every `should` four ways. Give every bare *this* its noun.
+     Delete *simply / easily / just / obviously*.
 
 Don't apply the rules as a mechanical checklist over the master heuristic — the
 window comes first. A rule yields whenever following it would fog the glass.
+
+**But note which way that escape hatch cuts.** Every rule here yields to the
+window; the counters in step 7 do not yield to your own sense that a sentence
+reads well. That sense is the failure mode. A trigger firing does not make a
+sentence wrong, but it does oblige you to make the judgment consciously rather
+than let a dense sentence through because it sounded good.
+
+## Composing with the voice skill
+
+When `roasbeef-prose` is also active, **the voice skill wins on any conflict** —
+em-dashes, prose over bullets, first-person plural, inline *e.g.*, parenthetical
+asides, dry humor, the emphatic *just*, and unglossed domain jargon for an
+audience that knows it. The override table at the bottom of `anti-density.md`
+lists each with its reason; the em-dash case is argued in full at `mechanics.md`
+§9. Consult them rather than re-deriving the resolution, and don't "restore" an
+overridden rule as a fidelity fix to Pinker or to Google.
+
+Google's guide licenses this itself: *"As always, it's fine to deviate from our
+guidance if that serves your readers better."* It is a house style tuned for a
+mixed, often non-native, often non-expert readership, not a theory of prose.
+Pinker's cognitive arguments and the reader in front of you outrank it.
