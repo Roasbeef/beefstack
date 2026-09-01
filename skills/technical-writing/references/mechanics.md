@@ -137,15 +137,30 @@ half-pictures ("the company's bread and butter had risen… coasting on its laur
 a low-octane swan song… a renaissance man drilling down to core issues and pushing
 the envelope").
 
-**The rule is not a blacklist — freshen or twist.** Insist on fresh wording and
-concrete imagery that keeps the reader's sensory cortex lit up. Even a cliché can be
-made new by inverting it:
+**Against a *cliché*, the rule is not a blacklist — freshen or twist.** Insist on
+fresh wording and concrete imagery. Even a cliché can be made new by inverting it:
 "Directing team owners is like herding cats." → "To suggest that directing team
 owners is like herding cats is to give cats a bad name."
 
-The deep source of the skill is *wide reading* — an absorbed inventory of words,
-idioms, and a feel for how they mesh or clash. Operationally: detect stock phrasing,
-then freshen or twist it rather than mechanically deleting.
+> ### ⚠ Do not read "freshen" as a licence to invent metaphors
+>
+> This section is about **stock** phrasing: dead idioms the reader skims past.
+> Freshening a cliché is not the same act as coining a new figurative frame to
+> carry an explanation, and the second is a known failure mode of strong models —
+> the just-in-time metaphor the reader must decode before reaching the claim.
+>
+> **For technical explanation, the default is zero invented metaphors.** State the
+> mechanism literally, in the field's own words. Established field vocabulary
+> (*handshake, leak, tree, backpressure, mempool, Byzantine generals*) is not a
+> live metaphor and needs none of this treatment — it is jargon, so use it plainly.
+>
+> The discriminator, the grep triggers, the delete-and-reread test, and the
+> "unlike a ___" limit rule are in `anti-density.md` §1. Read it before you write
+> a sentence containing *think of X as*, *is like*, *acts like*, or *imagine*.
+
+The deep source of the skill against cliché is *wide reading* — an absorbed
+inventory of words, idioms, and a feel for how they mesh or clash. Operationally:
+detect stock phrasing, then freshen it, or make it concrete, or cut it.
 
 ## 6. Officialese — bloated → plain
 
