@@ -181,6 +181,24 @@ but resolves cleanly:
   bookmark that lets the reader pause, breathe, assimilate, and find their place
   again. Break paragraphs to rest the reader and mark a shift in the discourse tree,
   not by a rigid "one idea per paragraph" rule.
+
+  > **The counter that makes this actionable.** The claim above is right as theory
+  > and useless as an instruction, because it names no moment at which to stop and
+  > check. Supply one: **at 6 sentences, stop and re-justify** that the paragraph
+  > is genuinely still one idea; **at 8, split regardless.** The count never
+  > decides what the paragraph should be. It only forces the judgment this section
+  > already demands, at a point where it otherwise goes unmade.
+  >
+  > **Ship the anti-cheat clause with it or it backfires.** Google: "Don't make
+  > sentences longer in order to limit the number of sentences in a paragraph."
+  > Without that, a paragraph ceiling manufactures exactly the sentence density it
+  > exists to cure. And don't overcorrect: "if your document contains plenty of
+  > one-sentence paragraphs, your organization is faulty." Splitting is not
+  > chopping.
+- **Put the point in sentence 1.** "Busy readers focus on opening sentences and
+  sometimes skip over subsequent sentences." If the paragraph's actual claim lands
+  in sentence 3 or later, move it up. This is given-before-new applied at the
+  paragraph scale, and it is the cheapest structural fix available.
 - **Coherence ≠ signposting.** The good way to show how parts relate is
   *intrinsic*: consistent topic strings, given-before-new ordering, the right
   connective, parallel syntax.
@@ -208,4 +226,7 @@ but resolves cleanly:
 7. Strip metadiscourse ("In this section…"), but keep logical connectives.
 8. Prefer affirmatives; hunt hidden negatives; negate only what the reader believes.
 9. Keep one consistent point per arc; tell the reader early what kind of text it is.
-10. Break paragraphs to rest the reader and mark tree shifts — not by formula.
+10. Break paragraphs to rest the reader and mark tree shifts — not by formula,
+    but re-justify at 6 sentences and split at 8, without padding sentences to
+    dodge the count.
+11. Put the paragraph's point in its first sentence.
