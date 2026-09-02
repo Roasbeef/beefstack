@@ -1,7 +1,7 @@
 ---
 name: codify
 description: "Turns an observed agent misbehavior, or a correction the user just gave, into a durable fix: a hook that makes the behavior impossible, a CLAUDE.md rule, a change to the skill that was running, or a new reusable skill. Picks the narrowest home that removes the failure mode, checks for an existing rule to tighten before adding one, and keeps CLAUDE.md from bloating. Invoked via /codify when an agent goes off the rails on something the user does not want repeated."
-argument-hint: "[<what went wrong, or the rule to encode>] [--home=hook|claude|project|skill:<name>|new-skill]"
+argument-hint: "[<what went wrong, or the rule to encode>] [--home=hook|claude|skill:<name>|new-skill|memory] [--scope=global|project]"
 disable-model-invocation: true
 allowed-tools:
   - Read
@@ -63,6 +63,7 @@ Before adding anything, grep for the topic:
 ```
 grep -n -i '<keyword>' ~/.claude/CLAUDE.md ./CLAUDE.md ./.claude/CLAUDE.md
 grep -rn -i -l '<keyword>' ~/.claude/skills/*/SKILL.md ./.claude/skills/*/SKILL.md
+grep -n -i '<keyword>' ~/.claude/settings.json ./.claude/settings*.json
 ```
 
 Three outcomes:
@@ -79,28 +80,43 @@ Three outcomes:
 
 ## 4. Pick the home
 
-Choose the narrowest mechanism that removes the failure mode. Honor `--home`
-if given; otherwise walk the ladder top down and stop at the first fit:
+Two independent choices: the **mechanism** (how strongly it binds) and the
+**scope** (where it applies). Honor `--home` if given.
 
-1. **Hook** (`settings.json`). The behavior is mechanical and checkable:
-   a command that must never run, a file that must be formatted, a check
-   that must pass before stop. A hook makes the bad state unreachable
-   instead of asking the model to remember. Use the `update-config` skill to
-   write it, and test that it fires.
-2. **Global `CLAUDE.md`** (`~/.claude/CLAUDE.md`). A behavior-shaping rule
-   that applies across projects and fits in five lines or fewer. Add it to
-   the existing section it belongs to; create a section only when none fits.
-3. **Project `CLAUDE.md`**. The same, but the rule is specific to one
-   codebase's conventions or history.
-4. **Existing skill.** The incident happened inside a skill's workflow, or
+**Scope first.** Does the rule hold everywhere, or only in this codebase?
+Each mechanism exists at both levels:
+
+| Scope | Hooks | Rules | Skills |
+|-------|-------|-------|--------|
+| Global | `~/.claude/settings.json` | `~/.claude/CLAUDE.md` | `~/.claude/skills/` |
+| Project | `.claude/settings.json` | `./CLAUDE.md` or `.claude/CLAUDE.md` | `.claude/skills/` |
+
+A project rule that is really a general principle belongs global; a global
+rule that only ever fires in one repo belongs in the project. For project
+hooks, `.claude/settings.json` is committed and binds every contributor's
+agents, while `.claude/settings.local.json` is gitignored and binds only
+yours. Pick by whether the team should inherit the rule.
+
+**Then the mechanism.** Walk the ladder top down and stop at the first fit:
+
+1. **Hook.** The behavior is mechanical and checkable: a command that must
+   never run, a file that must be formatted, a check that must pass before
+   stop. A hook makes the bad state unreachable instead of asking the model
+   to remember. Use the `update-config` skill to write it, and test that it
+   fires. A project hook can call a script checked into the repo, which is
+   the right place for a check that depends on the project's toolchain.
+2. **CLAUDE.md rule.** A behavior-shaping rule that fits in five lines or
+   fewer. Add it to the existing section it belongs to; create a section only
+   when none fits.
+3. **Existing skill.** The incident happened inside a skill's workflow, or
    the rule only matters when that skill is active (see step 3).
-5. **New skill.** The fix is a multi-step procedure or reference material too
+4. **New skill.** The fix is a multi-step procedure or reference material too
    long to be always-on, triggered by a recognizable situation. Follow the
    `skill-creator` conventions: frontmatter `name` and `description` written
    in the third person and specific about the trigger, procedure in the body,
    long reference material under `references/`. Set
    `disable-model-invocation: true` if it should only run when named.
-6. **Auto-memory.** A fact about the user or a project that is context, not a
+5. **Auto-memory.** A fact about the user or a project that is context, not a
    rule (a preference with no do/don't attached). Write it as a memory file
    per the memory instructions rather than a CLAUDE.md line.
 
@@ -121,8 +137,10 @@ Match the voice and shape of the file you are editing. For `CLAUDE.md`:
   it. Report what you cut.
 
 For a skill: keep `SKILL.md` to procedure and put bulk in `references/`. For
-a hook: prefer a small shell script under `~/.claude/hooks/` over an inline
-command, and make the failure message tell the agent what to do instead.
+a hook: prefer a small shell script over an inline command, under
+`~/.claude/hooks/` for global scope or `.claude/hooks/` in the repo for
+project scope, and make the failure message tell the agent what to do
+instead.
 
 ## 6. Verify
 
