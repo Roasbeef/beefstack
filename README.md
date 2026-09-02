@@ -1,10 +1,10 @@
 # beefstack
 
 A Claude Code configuration built up over a year of daily use, mostly on Bitcoin
-and Lightning Network work. Skills, sub-agents, hooks, session continuity, and
-inter-agent messaging, arranged so that long and unglamorous engineering tasks
-survive context compaction and can be handed to a fleet rather than done one
-prompt at a time.
+and Lightning Network work. Skills, sub-agents, hooks, session continuity,
+inter-agent messaging, and a set of repository conventions, arranged so that
+long and unglamorous engineering tasks survive context compaction and can be
+handed to a fleet rather than done one prompt at a time.
 
 It is a working setup rather than a demo. Everything here earned its place by
 being used, and the usage numbers below are measured from the local transcripts
@@ -53,6 +53,45 @@ default: `code-reviewer`, `security-auditor`, `differential-review`,
 `sharp-edges`, and `insecure-defaults` together account for more invocations
 than any single feature-building workflow.
 
+## The operating model
+
+The skills are the visible part. What makes them compose is a short set of
+rules in [`CLAUDE.md`](CLAUDE.md) that every session loads. They are worth
+stating here because they explain why the rest of the stack is shaped the way
+it is.
+
+**Manage complexity first.** Faced with a bad state, ask whether the design can
+make it unrepresentable before adding logic that copes with it. A fix that adds
+branches, flags, retries, or special cases for a rare path is treated as a
+design smell, and a review that manufactures rare scenarios and lands a pile of
+machinery to cover them is the named anti-pattern. Prefer the smaller diff.
+
+**Decide who to ask before deciding what to do.** A judgment call goes to
+`/advisor` when the main loop is on a cheap model; on a top-tier model the
+session reasons it through itself. A preference or scope call only the user can
+settle stops the work and asks with concrete options. A non-blocking status
+question goes out as Subtrate mail. The three channels are not conflated.
+
+**Work survives compaction.** Context is compacted automatically as it fills,
+and the first action after compaction is `/session-resume`. Sessions log as
+they go and checkpoint at milestones, so a task resumes instead of restarting.
+
+**A task is complete only when it works end to end.** Tests pass, every
+acceptance criterion is met, and a Stop hook that blocks is by design: finish
+the work or say what remains. Nothing is marked done to get past a hook.
+
+**Corrections become rules.** When the user corrects a behavior that could
+recur, `/codify` turns the incident into a hook, a `CLAUDE.md` rule, or a
+change to the skill that was running, whichever removes the failure mode most
+directly. The point is to keep `CLAUDE.md` from bloating: tightening an
+existing rule beats adding one.
+
+**Finished work gets one adversarial pass.** Before a substantive change is
+called done, `/advisor-review` has a fresh top-tier reader verify the
+load-bearing invariants, look for simplifications, and hunt for live variants
+of the bug shapes just fixed. One pass is the rule; a second over a clean diff
+is diminishing returns.
+
 ## Architecture
 
 ```mermaid
@@ -89,6 +128,13 @@ graph TB
         E3[orchestrate]
     end
 
+    subgraph Conventions["Repo conventions"]
+        direction LR
+        C1[decision-records]
+        C2[handoff]
+        C3[doc-graph]
+    end
+
     subgraph Domain["Bitcoin / Lightning"]
         direction LR
         D1[lnd]
@@ -108,6 +154,7 @@ graph TB
     Main ==> Review
     Main ==> Testing
     Main ==> Escalation
+    Main ==> Conventions
     Main ==> Domain
     Infra -.->|lifecycle| Main
 
@@ -116,6 +163,7 @@ graph TB
     classDef review fill:#ffccbc,stroke:#bf360c,stroke-width:2px,color:#000
     classDef testing fill:#fff9c4,stroke:#f57f17,stroke-width:2px,color:#000
     classDef escalation fill:#c5cae9,stroke:#1a237e,stroke-width:2px,color:#000
+    classDef conventions fill:#d7ccc8,stroke:#3e2723,stroke-width:2px,color:#000
     classDef domain fill:#b2dfdb,stroke:#004d40,stroke-width:2px,color:#000
     classDef infra fill:#f8bbd0,stroke:#880e4f,stroke-width:2px,color:#000
 
@@ -124,14 +172,15 @@ graph TB
     class R1,R2,R3,R4,R5 review
     class T1,T2,T3 testing
     class E1,E2,E3 escalation
+    class C1,C2,C3 conventions
     class D1,D2,D3,D4 domain
     class Sub,Ses,Hooks infra
 ```
 
 ## Skills
 
-Thirty skills, grouped by what they are for. Most are model-invoked when the task
-matches; a few are deliberately opt-in only.
+Grouped by what they are for. Most are model-invoked when the task matches; a
+few are deliberately opt-in only.
 
 ### Writing
 
@@ -175,6 +224,19 @@ rather than from `skills/`, and together they are the most-used review path here
 | `advisor-review` | Final adversarial audit of finished work |
 | `orchestrate` | Expensive planner decomposes, cheap workers execute in parallel, planner synthesizes |
 
+### Repo conventions
+
+How a repository records decisions and keeps its documentation true. These
+were distilled from the [Loom](https://github.com/Roasbeef/loom) repository,
+where they run daily, and each has an `init` mode that installs the arrangement
+in a repo that has none. The section below says what they set up.
+
+| Skill | Description |
+|-------|-------------|
+| `decision-records` | Where a decision goes: ADRs amended by addendum, protocol-change proposals for frozen interfaces, design notes with a status lifecycle, review waves with triage, corrections on the issue |
+| `handoff` | Rewrite `docs/next.md` from a fresh audit at the end of a body of work; `init` creates it plus a starter `docs/execution.md` |
+| `doc-graph` | Per-package `CLAUDE.md`/`AGENTS.md` graph with a no-toolchain gate (coverage, mirror, staleness, citation drift) and a repo-customized doc-gardening skill |
+
 ### Bitcoin and Lightning
 
 | Skill | Description |
@@ -200,6 +262,52 @@ rather than from `skills/`, and together they are the most-used review path here
 | `skill-creator` | Meta-skill for writing new skills |
 | `codify` | Turn an agent misbehavior or a correction into a hook, CLAUDE.md rule, or skill |
 
+## How a repository is run
+
+The three convention skills encode one way of working, and it is easier to
+explain as a whole than skill by skill.
+
+**A decision is only settled once it is written where the next reader will look
+for it.** There are five homes and they are not interchangeable. An
+architecture decision record holds a ruling whose consequences outlive one
+change, and it is amended by an addendum inside the file, never by a silent
+edit. A frozen interface moves only through a numbered protocol-change
+proposal, written before the work that needs it. A design note carries an
+exploration or a pre-code ruling, with a status line that moves from "note, not
+a work package" through "ruling, pre-code" to "built" rather than the note
+being deleted when its work lands. A review wave files one report per reviewer
+and one triage roll-up with a FIX, DOC, DEFER, or DISMISS disposition per
+finding; the reports are records of what was seen at a commit and are never
+re-pinned to a later tree. And when measurement contradicts an issue's
+diagnosis, which happens often, the correction goes on the issue as a comment
+before it goes in a commit. Across all five: a rule a gate can check belongs in
+a lint or a test, not in prose, because prose drifts and a gate does not.
+
+**The handoff is rewritten, not appended to.** `docs/next.md` is the file a
+fresh session reads first: where the tree stands against the plan of record,
+what to do next with exit criteria and a cut list, the rulings already made so
+nobody re-litigates them, what is deliberately left open, and how to verify a
+change. It is re-baselined at the end of every body of work by auditing the
+previous edition claim by claim against the tree and a CI run, and the claims
+that turned out false are named as such rather than dropped. Its sibling
+`docs/execution.md` is how work gets done: one orchestrator and disjoint
+sub-agent slices, long briefs that give the ruling rather than the question,
+verification by the gate's own exit code on a clean checkout, mutation testing
+as the standard of proof, and a hazards section where every entry cost real
+time first.
+
+**Every package documents itself, and a gate keeps it honest.** Each package
+with source carries a `CLAUDE.md` denser than the root one: purpose, key types,
+real dependency edges, its traffic with concrete type names, and the invariants
+that break things when violated. `AGENTS.md` beside it is a byte-identical
+mirror so every agent reads the same file. A shell script with no toolchain
+dependency checks coverage, mirror equality, staleness by git commit time
+rather than mtime, and every `file.ext:NN` citation in the docs: the file must
+resolve to exactly one path, the line must exist, and the backticked symbol
+named beside it must still be within a few lines of it. Staleness is a warning
+by design, and the warning list is the queue the doc-gardening skill works
+from, reading source and changing only what moved.
+
 ## Sub-agents
 
 Specialized agents that run in their own context window, so a deep investigation
@@ -217,6 +325,18 @@ does not consume the main loop's budget.
 | Debug Chronicler | Turn a debugging session into a runbook |
 | Mutation Tester | Mutation analysis for test quality |
 | Design Iterator | Screenshot, analyze, improve, repeat |
+| Presentation Builder | Slide decks from written content, with feedback rounds |
+
+## Slash commands
+
+Commands in `commands/` are the user-invoked entry points that fan work out to
+the agents above. The review family (`/code-review`, `/security-review`,
+`/focused-review`, `/pre-pr-review`, `/batch-review`, `/resolve-pr-comments`)
+is the most used. `/ideate` and `/goalcraft` are interview-driven planning;
+`/issue-plan` turns a GitHub issue into an implementation plan; `/test-forge`
+and `/fuzz-test` generate tests; `/chronicle-fix` turns a debugging session
+into a runbook; and the `/session-*` family is the continuity system described
+below.
 
 ## Subtrate and mission control
 
@@ -278,7 +398,12 @@ compaction, so a long task resumes instead of restarting.
 ## Hooks
 
 Shell scripts bound to Claude Code lifecycle events. These are what make
-identity and session continuity work without the model having to remember.
+identity and session continuity work without the model having to remember, and
+what turns a rule into something the harness enforces rather than something the
+model is asked to recall. What follows is what `settings.json` actually wires;
+`hooks/` also holds a few older scripts (a sensitive-file guard, a Go format
+check, a git status refresher, a test runner) that are no longer bound to any
+event.
 
 ### Substrate hooks
 
@@ -287,12 +412,27 @@ identity and session continuity work without the model having to remember.
 - **Stop**: long-poll, keeping the agent alive for inter-agent work
 - **SubagentStop**: one-shot mail check, then exit
 - **PreCompact**: save identity for restoration afterward
+- **Notification**: forward the harness notification to the agent's card
+- **PermissionRequest** on `ExitPlanMode`, and **PostToolUse** on plan
+  writes and task-list changes: sync the plan and tasks to mission control
 
-### Context hooks
+### Session hooks
 
-- **SessionStart** (`load_project_context.sh`): load project context and active sessions
-- **UserPromptSubmit** (`context_enhancer.py`): inject context based on keywords
-- **PreCompact** (`save_important_context.sh`): archive context before compaction
+- **SessionStart** (`load_project_context.sh`): show the active session's
+  summary, progress, and blockers, and suggest `/session-resume`
+- **SessionStart** after compaction: a one-line reminder that
+  `/session-resume` runs before anything else
+- **UserPromptSubmit** (`context_enhancer.py`, `session_context.py`): detect
+  "continue" or "resume" and inject session context
+- **PreCompact** (`save_important_context.sh`): checkpoint the session and
+  emit the context that must survive the summary
+
+### Prompt hooks
+
+- **UserPromptSubmit** (`ultrathink_hook.py`): expand a prompt-level
+  thinking directive before the model sees it
+
+[`HOOKS.md`](HOOKS.md) has the recipes for writing new ones.
 
 ## Directory structure
 
@@ -301,15 +441,17 @@ identity and session continuity work without the model having to remember.
 ├── CLAUDE.md              # Global instructions for all projects
 ├── README.md              # This file
 ├── SESSIONS.md            # Session system documentation
+├── HOOKS.md               # Hook system documentation
 ├── settings.json          # Hooks, permissions, sandbox, model
-├── skills/                # 30 skills
-├── agents/                # 11 sub-agent definitions
+├── skills/                # Skills, one directory each with SKILL.md
+├── agents/                # Sub-agent definitions
 ├── commands/              # Slash command definitions
 ├── hooks/                 # Lifecycle hook scripts
 │   ├── substrate/         # Agent messaging
 │   ├── sessionstart/
 │   ├── precompact/
-│   └── userpromptsubmit/
+│   ├── userpromptsubmit/
+│   └── ...                # older scripts, no longer wired
 ├── projects/              # Per-project state and transcripts
 ├── plans/                 # Plan files from planning sessions
 └── plugins/               # Plugin cache
@@ -346,6 +488,11 @@ identity and session continuity work without the model having to remember.
    configuration. Note that `permissions.defaultMode` is set to
    `bypassPermissions` here, which suits a sandboxed personal setup and may not
    suit yours.
+
+6. To bring the repository conventions to a project of your own, run
+   `/decision-records init`, `/handoff init`, and `/doc-graph init` in that
+   repo. Each detects what already exists, asks the one or two questions it
+   cannot answer from the tree, and installs the rest.
 
 See the [Claude Code documentation](https://docs.anthropic.com/en/docs/claude-code/overview)
 for general setup and the [hooks guide](https://docs.anthropic.com/en/docs/claude-code/hooks-guide)
