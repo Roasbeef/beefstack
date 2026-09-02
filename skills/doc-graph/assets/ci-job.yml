@@ -1,0 +1,4 @@
+# Add to the workflow that runs on main. Staleness is a warning and never
+# fails the job; coverage, mirror and decidable citation drift do.
+      - name: make doc-check
+        run: make doc-check
