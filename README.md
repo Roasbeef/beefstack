@@ -198,6 +198,7 @@ rather than from `skills/`, and together they are the most-used review path here
 | `litbucket` | Publish static artifacts to an internal address |
 | `herdr` | Terminal multiplexer control for coding agents |
 | `skill-creator` | Meta-skill for writing new skills |
+| `codify` | Turn an agent misbehavior or a correction into a hook, CLAUDE.md rule, or skill |
 
 ## Sub-agents
 
