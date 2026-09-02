@@ -332,7 +332,17 @@ identity and session continuity work without the model having to remember.
    substrate hooks install
    ```
 
-4. Review `settings.json` for hook paths, permissions, model, and sandbox
+4. Share the instructions and skills with other agents. `CLAUDE.md` doubles
+   as the `AGENTS.md` that Codex and the rest read, so link rather than copy
+   to keep them from drifting:
+   ```bash
+   mkdir -p ~/.agents
+   ln -sfn ~/.claude/CLAUDE.md ~/.codex/AGENTS.md
+   ln -sfn ~/.claude/CLAUDE.md ~/.agents/AGENTS.md
+   ln -sfn ~/.claude/skills ~/.agents/skills
+   ```
+
+5. Review `settings.json` for hook paths, permissions, model, and sandbox
    configuration. Note that `permissions.defaultMode` is set to
    `bypassPermissions` here, which suits a sandboxed personal setup and may not
    suit yours.
