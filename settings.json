@@ -45,7 +45,7 @@
     ],
     "defaultMode": "bypassPermissions"
   },
-  "model": "opus",
+  "model": "opus[1m]",
   "hooks": {
     "Notification": [
       {
@@ -284,6 +284,7 @@
     ]
   },
   "alwaysThinkingEnabled": true,
+  "tui": "fullscreen",
   "showThinkingSummaries": true,
   "skipDangerousModePermissionPrompt": true,
   "skipWorkflowUsageWarning": true,
@@ -291,6 +292,14 @@
   "verbose": true,
   "agentPushNotifEnabled": true,
   "voiceEnabled": true,
+  "modelSettings": {
+    "claude-fable-5-1": {
+      "effortLevel": "medium"
+    },
+    "claude-opus-5": {
+      "effortLevel": "high"
+    }
+  },
   "feedbackSurveyState": {
     "lastShownTime": 1753983872081
   }
