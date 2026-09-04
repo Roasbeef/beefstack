@@ -119,6 +119,15 @@
       {
         "matcher": "",
         "hooks": []
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/gocode/src/github.com/lightninglabs/magi/contrib/magi-broker-hook.sh"
+          }
+        ]
       }
     ],
     "SessionEnd": [
