@@ -1,204 +1,95 @@
 ---
 name: explainer-video
 description: >
-  Produce a narrated explainer video end to end — interview-driven, like
-  /ideate but the output is a rendered mp4. Pipeline: script → TTS or recorded
-  VO → Whisper word timestamps → Remotion scenes cued to the spoken word →
-  headless 4K render. Use when asked to "make a video", "produce an explainer",
-  or "turn this script/post into a video".
+  Produce narrated explainer and promo videos end to end, interview-driven, as
+  rendered MP4s. Pipeline: interview + inspiration review → script with Eleven
+  v4 delivery tags → one-take VO → Whisper word timestamps → kinetic-reel
+  motion design (canvas 2D type + three.js layers + WebGL post +
+  shape-continuity transitions + synthesized, VO-ducked score), with a
+  HyperFrames paper-collage variant for vertical social cuts → QA from the
+  encoded MP4 → 1080p/4K/9:16 deliverables. Use when asked to "make a video",
+  "produce an explainer", "make a promo", or "turn this script/post into a video".
 ---
 
-# Explainer Video — interview-driven e2e production
+# Explainer video
 
-Turn a rough idea, script, or blog post into a finished narrated motion-graphics
-video. The edit is *text*: because every overlay is cued to a transcript word,
-the VO is a swappable input and the whole video is re-renderable from source.
+Turn a post, script or rough idea into finished narrated motion-design videos.
+The VO is the clock: every cut and hit is keyed to a spoken word, so the edit
+is text and the whole video re-renders from source.
 
-## Pipeline shape
+The bar is set by current code-rendered motion design (three.js depth, WebGL
+post, shape-continuity transitions, editorial type, a real score), not by
+panels with fades. Plain Remotion panels were judged "what a model could do
+months ago"; the kinetic-reel rebuild of the same material was "great".
 
-```
-script.md ──→ VO audio (TTS or recorded) ──→ Whisper word timestamps
-                                                    ↓
-        shared components + anim.tsx  ──→  Remotion scenes (React)
-                                                    ↓
-                              cue sheet times every overlay to the spoken word
-                                                    ↓
-                              headless render ──→ out/final.mp4
-```
+References (read when you reach that phase):
+- `references/voiceover.md`: Eleven v4, tags, one take, Whisper, revisions
+- `references/engines.md`: kinetic-reel (default), paper-collage, Remotion
+- `references/kinetic-reel-style-guide.md`, `references/kinetic-reel-sound.md`:
+  upstream look/motion/sound method (read in full before storyboarding)
+- `references/qa.md`: shot rules and the orchestrator's QA checks
+- `templates/kinetic-reel-seed/`: the engine snapshot (see its README)
+- `scripts/contact_sheet.sh`: frames from an MP4 → one tiled image
 
-The expensive half is **graphics**, not editing. Budget accordingly.
+## Phase 0: interview and inspiration (mandatory)
 
-## Phase 0 — Interview (mandatory, /ideate style)
+1. **Read every inspiration link the user sends before designing,** then tell
+   them in two sentences what bar those links set. Skipping three of four links
+   was the biggest miss of a recent production: a full v1/v2 was built below
+   the bar the user had already pointed at.
+2. Batch 3–4 questions per AskUserQuestion: audience and the one scene they came
+   for (the hero); cuts and lengths (e.g. 2.5 min explainer + 60 s promo); looks
+   (16:9 kinetic-reel default; 9:16 collage for social); footage (rebuild the
+   real product UI in code); VO voice (audition, see voiceover.md).
+3. Write `production.md` (deliverables matrix, framing, hero, design system,
+   **facts block**: product names, model names, prices, units, sources) and
+   `script.md`. These are the contract every agent reads.
+4. **Size the hero in the script.** With the VO as the clock, a paragraph's
+   length is its screen time. Hero ≈ 30–35% of runtime means writing it that long.
+5. Rebuild real UIs from the real app: run it in tmux, `capture-pane -p -e` for
+   layout and exact ANSI colours. This was the most-praised element.
 
-Batch 3–4 questions per `AskUserQuestion` call. Cover these areas before
-touching anything; target ~80% confidence:
+## Phase 1: voiceover
 
-1. **Audience & framing** — who is this for, and what one scene matters most
-   to them? Every video has one scene the audience actually came for — find
-   it, name it in the plan, and give it the most visual care and room to
-   breathe.
-2. **Arc & scenes** — how many scenes, what's the one-line idea of each?
-   Target length? (~140 wpm spoken; TTS reads ~10% faster than estimate.)
-3. **VO route** — **A:** user records (~20 min, authentic) or **B:** ElevenLabs
-   TTS (instant, re-generatable while the script is still moving).
-   Recommend B for the first render, swap A in later — the graphics don't care.
-   If B: confirm `ELEVENLABS_API_KEY`, then **audition the voice before
-   committing**: generate one script line in 2–3 candidate voices
-   (`vo/samples/*.mp3`), have the user `afplay` them, and pick via
-   AskUserQuestion. A voice change after scenes are built forces a full
-   re-cue of every scene (see Iterating below), so this cheap step earns
-   its round-trip.
-4. **Design system source** — a product screenshot to derive from beats an
-   invented look every time. Ask for one. Extract: palette, type rules (mono
-   for numerics is a strong default), signature components worth rebuilding
-   as animatable React.
-5. **Logistics** — repo location, resolution (default 3840×2160 @ 30fps),
-   deadline pressure. If the day is short, agree on a **fast path** now: which
-   scene subset is a coherent standalone cut?
+Follow `references/voiceover.md`: Eleven v4 (`eleven_v4`), voice audition,
+delivery tags, TTS-only spellings, heteronym sweep, **one continuous take per
+cut**, report runtime against target, then Whisper word timestamps with
+compound names and homophones fixed in the cue file.
 
-Write the answers into `production.md` in the repo (scene briefs + design
-system + fast path), and the narration into `script.md`. These two files are
-the contract every downstream agent reads.
+## Phase 2: storyboard and build (kinetic-reel)
 
-## Phase 1 — Setup (hard-won gotchas, do not rediscover)
+Follow `references/engines.md`. In short:
+1. Copy the most recent approved reel project (or `templates/kinetic-reel-seed`),
+   re-key palette, fonts and brand marks to this project.
+2. `STORYBOARD.md` first: chapter budgets, one row per shot with headline,
+   visual mechanism, transition in, sound, and the VO cue word + ms.
+3. `reel/cues.js` from the transcript (shared by page and score), shots in
+   `reel/parts/*.js`, `music/score.mjs`, `mix.sh`.
+4. Render contact sheets per chapter and Read them; ≥ 2 full review passes.
+5. One agent can build a whole 1–3 minute reel (cheap renders, shared
+   engine). Use parallel agents per *cut* or per *variant* (16:9 explainer,
+   16:9 promo, 9:16 collage), not per shot. Brief each agent with the contract
+   files, the shot rules from `references/qa.md`, and the LESSONS file below.
+6. For the vertical social cut, build the HyperFrames paper-collage variant from
+   the same VO and words file (engines.md).
 
-- Scaffold: `npm init -y`, then `npm i remotion @remotion/cli react react-dom`
-  and `npm i -D typescript@5 @types/react @types/react-dom`.
-  - **Pin `typescript@5`.** TypeScript 7 (the Go compiler) drops `ts.sys`,
-    which `@remotion/bundler` needs; the failure is an opaque
-    `Cannot read properties of undefined (reading 'readFile')` in esbuild-loader.
-  - Do **not** set `"type": "module"` in package.json.
-- Whisper: `brew install whisper-cpp`, model via
-  `curl -L -o work/models/ggml-base.en.bin https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin`
-  (~142MB; base.en is plenty for clean VO). The old pip `whisper` binary on
-  this machine is dead (stale python3.9 shebang) — don't use it.
-- Secrets: user exports live in `~/.zshrc`, which non-interactive shells skip.
-  Snapshot with `zsh -lic 'printf "ELEVENLABS_API_KEY=%s\n" "$ELEVENLABS_API_KEY" > .env'`
-  (note `-i`), `chmod 600`, gitignore it.
-- Renders and installs may need the sandbox disabled (TLS/cert + Chrome).
-  Remotion downloads its own headless Chrome on first render.
-- Layout: `vo/` (audio + per-scene .txt), `work/transcripts/`, `work/models/`,
-  `public/vo/` (copies for `staticFile`), `src/scenes/`, `src/components/`,
-  `out/` (gitignored), `refs/` (design reference screenshots).
+## Phase 3: QA, deliver, iterate
 
-## Phase 2 — VO + word timestamps
+Follow `references/qa.md`: the orchestrator checks the encoded MP4 (chapter
+sheets, frame-2 sheet of every shot opening, transition strips, loudness), sends
+fixes back to the owning agent, and re-checks the new MP4. Then deliver:
 
-- One `.txt` per scene from the script's narration (blockquotes only, not
-  stage directions). **Spell out tickers/initialisms phonetically** for TTS
-  ("P-S-B-T", "L-N-D") — the graphics show the real spelling.
-- **Sweep the script for heteronyms before generating** — words whose
-  pronunciation depends on part of speech: *invalid* (adjective) vs *invalid*
-  (noun), *live*, *record*, *present*, *content*, *object*, *produce*. TTS
-  guesses wrong often enough to matter; reword the sentence (e.g. "render it
-  invalid" → "invalidate it") rather than fighting the model.
-- Generate via the ElevenLabs API in a re-runnable `vo/generate.sh`: for each
-  scene, `jq -Rs '{text: ., model_id: "eleven_multilingual_v2", voice_settings:
-  {stability: 0.5, similarity_boost: 0.75, style: 0.25}}' < vo/sceneN.txt`
-  POSTed to `/v1/text-to-speech/<VOICE_ID>?output_format=mp3_44100_128` with
-  the `xi-api-key` header. Voice "Brian" (`nPczCjzI2devNBz1zQrb`) is a good
-  narration default.
-- Report total runtime vs target immediately — this is the moment to trim.
-- Transcribe:
-  `ffmpeg -i vo/sceneN.mp3 -ar 16000 -ac 1 work/sceneN.wav` then
-  `whisper-cli -m work/models/ggml-base.en.bin -f work/sceneN.wav -ml 1 -sow -oj -of work/transcripts/sceneN`.
-  `-ml 1 -sow` gives one word per segment: `.transcription[].offsets.from/to`
-  in **milliseconds**. Frame = `ms / 1000 * fps`.
+- 16:9 1080p share encode and 4K master (`--sc=2`), 9:16 collage if requested;
+  paths plus a hero frame. Say plainly that nobody listened to the mix and ask
+  the user to judge the music level (`MUSIC_DB` changes need no picture
+  re-render).
+- Keep every version (`-v2`, `-v3`, git tags); old cuts get asked for.
+- Agent tooling: parallel agents using agent-browser must each set
+  `AGENT_BROWSER_SESSION`; the default session is shared and they will
+  screenshot each other's pages.
 
-## Phase 3 — Design system + shared components (single writer)
+## Lessons file
 
-Build these yourself *before* fanning out scenes, so parallel agents never
-fight over shared files:
-
-- `src/anim.tsx` — all global timing knobs (reveal/stagger/overlayIn/
-  overlayOut/easing), palette, fonts. "Make it snappier" must be a one-line
-  change. Eased motion only, never bouncy.
-- `src/components/<system>.tsx` — the signature components rebuilt from the
-  reference screenshot as animatable React (props expose the animatable bits,
-  e.g. a bar's `fill: 0..1`). Reuse components across scenes — one asset-bar
-  component can serve both a wallet view and a set of supply counters — so
-  the video reads as one product.
-- Stubs for every scene + `Root.tsx` + `FinalEdit.tsx`, typecheck, and render
-  one smoke still — prove the whole render path before the expensive phase.
-
-## Phase 4 — Scenes in parallel (Workflow fan-out)
-
-One agent per scene (`parallel`, one phase). Each agent:
-
-- owns exactly one file, `src/scenes/SceneN.tsx`, keeps the propless
-  `React.FC` export;
-- keeps **every beat frame in one cue table** (a single const object at the
-  top of the file, one named entry per narration word/phrase) and derives all
-  other timing (fade-outs, sequence durations) from those entries — never as
-  free-floating literals. This is what makes a later VO/voice swap a
-  mechanical retime instead of an archaeology dig;
-- reads `production.md`, `script.md`, its transcript JSON, `anim.tsx`,
-  the shared components;
-- gets its frame budget (VO duration + ~0.9s tail) and a concrete visual
-  brief *in the prompt* — beats named against narration phrases;
-- runs a mandatory verify loop, ≥2 iterations: `tsc --noEmit`, then
-  `npx remotion still SceneN out/review/sceneN-f<F>.png --frame <F>` at 4–6
-  beat frames, Read the PNGs, critique, fix;
-- returns structured output: beats + frame numbers, decisions, still paths.
-
-After the fan-out: full-project `tsc`, personally Read a few stills from each
-scene (cross-scene consistency is the orchestrator's job, not the agents'),
-then commit.
-
-## Phase 5 — Cue sheet + render + QA
-
-- `FinalEdit.tsx`: `<Series>` of scenes, each wrapped with
-  `<Audio src={staticFile('vo/sceneN.mp3')} />`; boundaries from real
-  (ffprobe) durations + the tail pad, mirrored in `Root.tsx`.
-- Render in the background: `npx remotion render FinalEdit out/final.mp4
-  --codec h264`. ~4.7k 4K frames ≈ 10–25 min on an M-series; progress doesn't
-  stream through pipes, check the process not the log.
-- QA **from the mp4 itself**, not the review stills:
-  `ffprobe` (duration, both streams present);
-  `ffmpeg -ss <t> -i out/final.mp4 -frames:v 1` at ~10 timestamps including
-  scene boundaries, Read them; `-af volumedetect` on a slice (expect max
-  around −6dB, no clipping).
-- Deliver the path + a hero frame (Substrate attachments are image-only —
-  don't try to attach the mp4).
-
-## Iterating after v1
-
-**Always `git tag v1` (v2, …) before starting a revision** — stakeholders ask
-for the old cut back more often than you'd think.
-
-- **Voice or narrator swap** — this re-times *every word*, not just the
-  changed scenes. Full pipeline re-run (VO → transcripts → durations), then
-  fan out one **re-cue agent per scene** with a hard constraint in the
-  prompt: *"the visual design is APPROVED — do not redesign, restyle, or
-  restructure; only retime beat constants to the new transcript."* Scenes
-  built with a proper cue table retime in minutes. Have each agent also
-  check its **tail behavior**: when the new slot runs longer, a retimed
-  exit can leave seconds of dead black — hold the final composition to the
-  cut instead.
-- **Stakeholder feedback round** — treat it as a mini Phase 0:
-  1. *Research before asking.* If the new direction needs facts or stats,
-     gather verifiable ones first (web search) so the clarifying questions
-     present real options, not placeholders.
-  2. *Ask with previews.* Batch the questions via AskUserQuestion and give
-     concrete ASCII mockups of the competing visual treatments — a picked
-     preview doubles as the scene brief.
-  3. *Scope each scene* as re-cue (design approved) vs rebuild (new story),
-     and run them as one parallel workflow with per-scene prompts.
-- **On-screen claims rule**: sizzle stats must be independently verifiable
-  and carry their source in the frame (e.g. "River Lightning Report, Feb
-  2026"). Round numbers age; sourced numbers survive review.
-- **Watch runtime creep**: new lines + per-scene pads add up — recheck total
-  against the target right after VO regen (TTS reads ~10% faster than the
-  140wpm estimate, but feedback rounds usually *add* words).
-- "Make it snappier / calmer": edit `anim.tsx` only.
-- Script wording changes in one scene: regenerate **only that scene's** VO +
-  transcript, re-cue all of that scene's beats (the whole audio file is new,
-  so every offset in it moved — but only in that scene), update its duration.
-  **Never re-run the full generate loop for a one-scene change**: TTS output
-  is non-deterministic, so regenerating untouched scenes silently invalidates
-  their cues and costs API credits for nothing. Keep the generate script's
-  loop current, but do targeted regens inline.
-- **Adding a closing scene** (CTA, launch plan, next steps) is the cheapest
-  structural edit: no existing scene re-times — new VO + transcript, a new
-  scene file, one more Series entry in the cue sheet, done. If the video
-  needs a call to action, put the docs/product URL on screen in the final
-  resting frame — it's the last thing the audience sees.
+Keep appending to `~/agent-videos/LESSONS-explainer-video.md` (what worked,
+what didn't, and the fix) during every production, and ask build agents to add
+their own section. Fold recurring items back into this skill.
