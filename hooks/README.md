@@ -17,30 +17,29 @@ hooks/
 │   ├── posttooluse_plan.sh       # PostToolUse(Write): sync plan file writes
 │   └── task_sync.sh              # PostToolUse(Task*): sync the task list
 ├── sessionstart/
-│   └── load_project_context.sh   # SessionStart: active session summary
+│   └── load_project_context.sh   # SessionStart: .notes/ summary for the tree
 ├── userpromptsubmit/
-│   ├── context_enhancer.py       # UserPromptSubmit: "continue"/"resume" context
-│   └── session_context.py        # UserPromptSubmit: session state injection
-├── precompact/
-│   └── save_important_context.sh # PreCompact: checkpoint, emit surviving context
+│   └── context_enhancer.py       # UserPromptSubmit: "continue"/"resume" context
 └── ultrathink_hook.py            # UserPromptSubmit: prompt-level thinking directive
 ```
 
 One hook is inline in `settings.json` rather than a script: on `SessionStart`
-with the `compact` matcher, an `echo` reminds the model that `/session-resume`
+with the `compact` matcher, an `echo` reminds the model that `/session-log`
 runs before anything else.
 
-## The session hooks
+## The session-log hooks
 
-These four power the session system described in `../SESSIONS.md`:
+Two hooks support the `session-log` skill, whose record lives in an
+untracked `.notes/` directory at the top of each working tree:
 
-1. **On startup**, `load_project_context.sh` shows the active session's summary
-   and suggests `/session-resume` if `.sessions/active/` has files.
-2. **During work**, the model logs progress and decisions with `/session-log`.
-3. **Before compaction**, `save_important_context.sh` checkpoints the session
-   and prints the context that must survive the summary.
-4. **After compaction**, the inline reminder fires, and `context_enhancer.py`
-   injects session context when the user says "continue" or "resume".
+1. **On startup**, `load_project_context.sh` runs the skill's
+   `scripts/notes.sh status`, which prints the active plans, the next open
+   step, open questions, and the newest notebook entry, or a notice when
+   legacy `.sessions/` files are waiting to be imported.
+2. **After compaction**, the inline reminder tells the model to run
+   `/session-log` with no arguments to orient before anything else.
+
+Everything else is on disk, so nothing needs saving at `PreCompact`.
 
 ## Configuration
 

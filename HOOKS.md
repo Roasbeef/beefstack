@@ -11,14 +11,12 @@ file is the contract and the recipe for adding one.
 
 | Event | Matcher | Hook | Does |
 |-------|---------|------|------|
-| SessionStart | | `sessionstart/load_project_context.sh` | Active session summary, suggest `/session-resume` |
-| SessionStart | `compact` | inline `echo` | Reminder that `/session-resume` runs first after compaction |
+| SessionStart | | `sessionstart/load_project_context.sh` | The tree's `.notes/` summary via `session-log`'s `notes.sh status` |
+| SessionStart | `compact` | inline `echo` | Reminder that `/session-log` runs first after compaction |
 | SessionStart | | `substrate/session_start.sh` | Heartbeat, inject unread mail |
 | UserPromptSubmit | | `ultrathink_hook.py` | Append the thinking directive to the prompt |
 | UserPromptSubmit | | `userpromptsubmit/context_enhancer.py` | Detect "continue"/"resume", inject session context |
-| UserPromptSubmit | | `userpromptsubmit/session_context.py` | Session state injection |
 | UserPromptSubmit | | `substrate/user_prompt.sh` | Silent heartbeat, check for new mail |
-| PreCompact | | `precompact/save_important_context.sh` | Checkpoint the session, emit surviving context |
 | PreCompact | | `substrate/pre_compact.sh` | Save identity for restoration |
 | Stop | | `substrate/stop.sh` | Long-poll so the agent stays reachable for mail |
 | SubagentStop | | `substrate/subagent_stop.sh` | One-shot mail check, then exit |

@@ -107,9 +107,10 @@ After each round of answers, internally assess:
 Target ~80% confidence across relevant areas before proceeding.
 
 **Session Integration:**
-If an active session exists in `~/.claude/.sessions/active/`:
-- Log key decisions via `/session-log --decision`
-- State survives context compaction through session system
+If the tree has a `.notes/` record (the `session-log` skill), log key
+decisions with `/session-log decision "..." --rationale="..."`, and
+transcribe the final plan with `/session-log plan` so it survives
+compaction.
 
 ### Risk Detection
 

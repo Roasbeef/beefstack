@@ -101,15 +101,6 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/roasbeef/.claude/hooks/precompact/save_important_context.sh"
-          }
-        ]
-      },
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
             "command": "~/.claude/hooks/substrate/pre_compact.sh"
           }
         ]
@@ -151,7 +142,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo 'POST-COMPACTION: You MUST immediately run /session-resume to restore session context before doing anything else.'"
+            "command": "echo 'POST-COMPACTION: run /session-log with no arguments before anything else; it restores the plan, notebook and handoff from .notes/.'"
           }
         ]
       },
@@ -199,10 +190,6 @@
           {
             "type": "command",
             "command": "/Users/roasbeef/.claude/hooks/userpromptsubmit/context_enhancer.py"
-          },
-          {
-            "type": "command",
-            "command": "/Users/roasbeef/.claude/hooks/userpromptsubmit/session_context.py"
           }
         ]
       },

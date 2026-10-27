@@ -73,8 +73,9 @@ settle stops the work and asks with concrete options. A non-blocking status
 question goes out as Subtrate mail. The three channels are not conflated.
 
 **Work survives compaction.** Context is compacted automatically as it fills,
-and the first action after compaction is `/session-resume`. Sessions log as
-they go and checkpoint at milestones, so a task resumes instead of restarting.
+and the first action after compaction is `/session-log`, which reads the
+tree's on-disk plan, notebook, and handoff. Multi-step work keeps that record
+current as it goes, so a task resumes instead of restarting.
 
 **A task is complete only when it works end to end.** Tests pass, every
 acceptance criterion is met, and a Stop hook that blocks is by design: finish
@@ -146,7 +147,7 @@ graph TB
     subgraph Infra["Infrastructure"]
         direction LR
         Sub[Subtrate Messaging]
-        Ses[Session System]
+        Ses[Session Log]
         Hooks[Hook System]
     end
 
@@ -235,6 +236,7 @@ in a repo that has none. The section below says what they set up.
 |-------|-------------|
 | `decision-records` | Where a decision goes: ADRs amended by addendum, protocol-change proposals for frozen interfaces, design notes with a status lifecycle, review waves with triage, corrections on the issue |
 | `handoff` | Rewrite `docs/next.md` from a fresh audit at the end of a body of work; `init` creates it plus a starter `docs/execution.md` |
+| `session-log` | The same layout kept local and untracked in `.notes/`: plans, an append-only notebook, hazards, and a handoff, read first after compaction |
 | `doc-graph` | Per-package `CLAUDE.md`/`AGENTS.md` graph with a no-toolchain gate (coverage, mirror, staleness, citation drift) and a repo-customized doc-gardening skill |
 
 ### Bitcoin and Lightning
@@ -335,7 +337,7 @@ the agents above. The review family (`/code-review`, `/security-review`,
 is the most used. `/ideate` and `/goalcraft` are interview-driven planning;
 `/issue-plan` turns a GitHub issue into an implementation plan; `/test-forge`
 and `/fuzz-test` generate tests; `/chronicle-fix` turns a debugging session
-into a runbook; and the `/session-*` family is the continuity system described
+into a runbook; and the `session-log` skill is the continuity system described
 below.
 
 ## Subtrate and mission control
@@ -377,23 +379,31 @@ Subtrate is the primary channel for reaching a human outside a blocking prompt.
 Status updates go through `substrate send` rather than to a console nobody is
 watching.
 
-## Session management
+## Session log
 
-Sessions preserve progress, decisions, and discoveries across context
-compaction, so a long task resumes instead of restarting.
+The `session-log` skill keeps durable agent state on disk in an untracked
+`.notes/` directory at the top of each working tree, after the layout in
+roasbeef/loom:
+
+- `plans/<slug>.md`: one body of work, with exit criteria, steps that each
+  have a done-when check, a cut list, and decisions. Edited in place.
+- `notebook.md`: dated entries for progress, discoveries, blockers, and
+  decisions. Append only.
+- `execution.md`: the repo's gates and the hazards that cost real time.
+  Addendum only.
+- `next.md`: the handoff, rewritten at the end of a body of work by the
+  `handoff` skill's procedure.
 
 ```
-/session-init  ->  (active work)  ->  /session-close --complete
-                       |
-                 (compaction)
-                       |
-               /session-resume
+/session-log                     # orient: after compaction or in a fresh session
+/session-log plan "<goal>"       # start or revise a plan
+/session-log progress|discovery|blocker|decision "..."
+/session-log hazard "..."
+/session-log handoff             # close out or pause
 ```
 
-- Per-project tracking in `.sessions/` directories
-- Automatic state preservation via the PreCompact hook
-- Structured logging: progress, decisions, discoveries, blockers
-- Full documentation in [SESSIONS.md](SESSIONS.md)
+`.notes/` goes in the repository's `info/exclude`, so shared repos never see
+it.
 
 ## Hooks
 
@@ -416,16 +426,15 @@ event.
 - **PermissionRequest** on `ExitPlanMode`, and **PostToolUse** on plan
   writes and task-list changes: sync the plan and tasks to mission control
 
-### Session hooks
+### Session-log hooks
 
-- **SessionStart** (`load_project_context.sh`): show the active session's
-  summary, progress, and blockers, and suggest `/session-resume`
-- **SessionStart** after compaction: a one-line reminder that
-  `/session-resume` runs before anything else
-- **UserPromptSubmit** (`context_enhancer.py`, `session_context.py`): detect
-  "continue" or "resume" and inject session context
-- **PreCompact** (`save_important_context.sh`): checkpoint the session and
-  emit the context that must survive the summary
+- **SessionStart** (`load_project_context.sh`): print the tree's `.notes/`
+  summary (active plans, next open step, open questions, and the newest
+  notebook entry)
+- **SessionStart** after compaction: a one-line reminder that `/session-log`
+  runs before anything else
+- **UserPromptSubmit** (`context_enhancer.py`): detect "continue" or
+  "resume" and inject project context
 
 ### Prompt hooks
 
@@ -440,7 +449,6 @@ event.
 ~/.claude/
 ├── CLAUDE.md              # Global instructions for all projects
 ├── README.md              # This file
-├── SESSIONS.md            # Session system documentation
 ├── HOOKS.md               # Hook system documentation
 ├── settings.json          # Hooks, permissions, sandbox, model
 ├── skills/                # Skills, one directory each with SKILL.md

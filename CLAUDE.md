@@ -2,21 +2,24 @@
 
 Context is compacted automatically as it fills. Keep going; never stop a task
 early over token budget. **After compaction, your FIRST action is
-`/session-resume`**, before responding to anything. Signs: the conversation
-feels fresh but the user expects work to continue, SessionStart shows
-compaction_count > 0, or the user says "continue" / "where were we". If
-unsure, `ls .sessions/active/` and resume if files exist.
+`/session-log` with no arguments**, before responding to anything. It reads
+the tree's `.notes/` record (plan, notebook, handoff) and checks it against
+git. Do the same when a fresh session continues earlier work, or the user
+says "continue" / "where were we".
 
-While a session is active, log as you go and checkpoint at milestones:
+`.notes/` is untracked, per working tree. For multi-step work that could
+outlive the context, keep it current as you go:
 
 ```
-/session-log --progress|--discovery|--blocker "..."
-/session-log --decision "Choice" --rationale="Why"
-/session-checkpoint   # after a milestone, before risky changes, every ~30 min
+/session-log plan "<goal>"            # start or revise the plan
+/session-log progress|discovery|blocker "..."
+/session-log decision "Choice" --rationale="Why"
+/session-log hazard "..."             # something cost real time
+/session-log handoff                  # end of a body of work, or pausing
 ```
 
-`/session-init`, `/session-pause`, and `/session-close --complete` are the
-user's calls. Full docs: `~/.claude/SESSIONS.md`.
+Write when something would be lost if the context compacted now, not after
+every command. Skip it for small tasks. Details: the `session-log` skill.
 
 # Managing Complexity
 
@@ -73,7 +76,7 @@ A task is complete only when every acceptance criterion is met, tests pass,
 and the result works end-to-end. If a Stop hook blocks you, that is by design:
 finish the remaining work or ask what remains. Never mark a task complete to
 get past a hook. If you can't finish, leave it `in_progress`, log
-`/session-log --progress "Partial: ..."`, and ask.
+`/session-log progress "Partial: ..."`, and ask.
 
 # Codifying Corrections
 
