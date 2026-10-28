@@ -20,11 +20,19 @@ generic swarm catch it?
    the worked case). Record runs-to-find and the first failure message.
    Runs-to-find is the stable measure; wall time depends on the machine's
    load.
-4. Record misses honestly. A miss keeps its unit or FSM-level regression
+4. Revert everything that guards the failure. A later commit often covers
+   the same failure as the fix being measured (in the worked case, a helper
+   that recomputes the next checkpoint at every tip update also covered the
+   reset path), so reverting the original fix alone measures nothing. Pass
+   the set as `a,b` to `recall.sh`, oldest first.
+5. Record misses honestly. A miss keeps its unit or FSM-level regression
    test, and the report says why the swarm cannot reach it (the path is
    outside the harness, or it needs a state the generator rarely produces).
 
-`scripts/recall.sh` runs steps 2 and 3 for a list of commits.
+`scripts/recall.sh` runs steps 2 and 3 for a list of commits, commit sets
+or patch files. Check it once on a deliberate failure (a patch that fails
+the invariant checker after a few thousand checks) to confirm the found
+path and the runs-to-find parsing before trusting a column of misses.
 
 Do not use the regression corpus for recall: it contains the bug's own seed.
 Do not add a mode, op or excuse aimed at one bug to improve its recall.
