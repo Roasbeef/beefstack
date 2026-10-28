@@ -1,8 +1,7 @@
 ---
 name: arch-doc
-description: "Writes an architecture document for a package, subsystem, or pipeline in any codebase: a map of who owns what and how control and data flow, built from mermaid diagrams (component flowchart, startup sequence, state diagrams, per-pipeline flowcharts, ER schema) plus Owns / Does-not-own and goroutine-ownership tables, at a fixed prose weight. Gathers facts with one reader subagent per subsystem, writes the document itself, greps every quoted number against the code, renders every diagram, and opens a docs-only PR. Modeled on lightninglabs/neutrino docs/sync-architecture.md (PR 407). Use when the user wants an architecture overview, a design map, or onboarding docs for existing code. Invoked via /arch-doc."
+description: "Writes an architecture document for a package, subsystem, or pipeline in any codebase: a map of who owns what and how control and data flow, built from mermaid diagrams (component flowchart, startup sequence, state diagrams, per-pipeline flowcharts, ER schema) plus Owns / Does-not-own and goroutine-ownership tables, at a fixed prose weight. Gathers facts with one reader subagent per subsystem, writes the document itself, greps every quoted number against the code, renders every diagram, and opens a docs-only PR. Modeled on lightninglabs/neutrino docs/sync-architecture.md (PR 407). Use when the user wants an architecture overview, a design map, or onboarding docs for existing code, or invoke via /arch-doc."
 argument-hint: "<package|subsystem|pipeline> [--repo=<path>] [--range=<rev>..<rev>] [--out=docs/<name>.md]"
-disable-model-invocation: true
 allowed-tools:
   - Task
   - Read
@@ -219,6 +218,9 @@ code. Do not paper over a gap with confident prose.
 - `references/worked-example.md`: the structure of neutrino's
   `docs/sync-architecture.md`, section by section, and what each section
   does.
+- `references/example-hop-architecture.md`: a complete small document
+  (lnd `htlcswitch/hop`, 5 diagrams) produced with this skill. Use it as a
+  second reference for scale: a three-pipeline package at about 330 lines.
 - `references/skeleton.md`: Mermaid and table templates for each section.
 - `references/reader-brief.md`: the prompt for the per-subsystem reader
   subagents and the exact return format.
