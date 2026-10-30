@@ -14,12 +14,17 @@
 input=$(cat)
 stop_hook_active=$(echo "$input" | jq -r '.stop_hook_active // false')
 session_id=$(echo "$input" | jq -r '.session_id // empty')
+cwd=$(echo "$input" | jq -r '.cwd // empty')
 
 # Build session ID args if available. Array form prevents
 # word-splitting of odd session IDs.
 session_args=()
 if [ -n "$session_id" ]; then
     session_args=(--session-id "$session_id")
+fi
+project_dir="${CLAUDE_PROJECT_DIR:-${CODEX_PROJECT_DIR:-$cwd}}"
+if [ -n "$project_dir" ]; then
+    session_args+=(--project "$project_dir")
 fi
 
 # If we already blocked once and Claude processed messages, allow exit.

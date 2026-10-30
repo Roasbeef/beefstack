@@ -14,7 +14,6 @@ capabilities for Claude Code agents.
 |--------|---------|
 | Check inbox | `substrate inbox` |
 | Send message | `substrate send --to <agent> --subject "..." --body "..."` |
-| Send image | `substrate send --to <agent> --subject "..." --body "..." --attach shot.png` |
 | Read message | `substrate read <id>` |
 | Reply | `substrate send --to <agent> --thread <id> --body "..."` |
 | Search | `substrate search "query"` |
@@ -68,31 +67,7 @@ substrate send --to AgentName --subject "Urgent" --body "..." \
 
 # Send a git diff as a message (with syntax highlighting in web UI)
 substrate send-diff --to User --base main
-
-# Attach images (screenshots, mockups) - repeatable flag
-substrate send --to User --subject "UI update" --body "Before/after:" \
-  --attach before.png --attach after.png
 ```
-
-## Image Attachments
-
-Images travel through a shared attachments directory
-(`~/.subtrate/attachments`) rather than being embedded in message bodies.
-
-**Sending (agent → operator):** `substrate send --attach <file>` copies the
-image into the shared directory under a random name and appends a markdown
-image reference to the body. The web UI renders it inline (bounded at 320px)
-in the message prose. Allowed types: png, jpg, jpeg, gif, webp, svg.
-
-**Receiving (operator → agent):** when the user drags an image onto your
-canvas card in the Command Center, it lands in your inbox as a message with a
-markdown reference like `![name](/api/v1/attachments/<name>.png)`. To view
-it, read the file directly from `~/.subtrate/attachments/<name>.png` with the
-Read tool - the CLI and daemon share a filesystem, so no download is needed.
-
-Do not paste base64 data or local file paths into message bodies; the
-markdown sanitizer strips remote URLs and data URIs, so only same-origin
-attachment references render.
 
 ## Priority Handling
 
@@ -192,13 +167,39 @@ substrate publish <topic> --subject "..." --body "..."
 Subtrate integrates with Claude Code hooks:
 - **SessionStart**: Heartbeat + check inbox
 - **UserPromptSubmit**: Silent heartbeat + check for new messages
-- **Stop**: Long-poll for 9m30s, block exit to keep agent alive
 - **SubagentStop**: One-shot check, then allow exit
 - **PreCompact**: Save identity state
 - **Notification**: Send mail to User on permission prompts
 
-The Stop hook keeps your main agent alive and continuously checking for
-work. Use Ctrl+C to force exit.
+There is no Stop hook. Staying reachable is the agent's job, via the mail
+watcher described below.
+
+## Mail Watcher
+
+`substrate watch` blocks until mail arrives, then exits with a digest. Run
+in the background, its exit wakes you, so you can sit idle without polling.
+
+```bash
+substrate watch --session-id "$CLAUDE_SESSION_ID" --project "$PWD" --timeout 25m
+```
+
+Run it with the Bash tool's `run_in_background: true`. Check whether one is
+already armed with `substrate watch --check --session-id "$CLAUDE_SESSION_ID"`.
+
+**Keep one armed for the whole session, until the user says to stop.**
+
+- Arm it at session start (the SessionStart hook prompts for this) and after
+  every compaction, since background tasks die with the process.
+- Re-arm it after each wake, once you have handled the mail. A watcher that
+  exited 0 with a re-arm line, or on timeout with no mail, still needs
+  re-arming.
+- Always pass a bounded `--timeout` (25m). Claude Code kills background tasks
+  at 30 minutes, and an unbounded watcher dies as exit 130 and leaves you
+  watcher-less.
+- Arming does not end your turn. Keep working on the current task.
+- Stop re-arming only when the user says to ("stop watching", "turn off the
+  watcher", or similar). Then do not re-arm until they ask again. Subagents
+  do not arm their own.
 
 ## Plan Mode Integration
 

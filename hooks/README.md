@@ -9,7 +9,6 @@ hooks/
 ├── substrate/                    # Subtrate agent messaging and mission control
 │   ├── session_start.sh          # SessionStart: heartbeat, inject unread mail
 │   ├── user_prompt.sh            # UserPromptSubmit: silent heartbeat, mail check
-│   ├── stop.sh                   # Stop: long-poll so the agent stays reachable
 │   ├── subagent_stop.sh          # SubagentStop: one-shot mail check
 │   ├── pre_compact.sh            # PreCompact: save identity for restoration
 │   ├── notification.sh           # Notification: forward to the agent's card

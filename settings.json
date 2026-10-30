@@ -156,18 +156,6 @@
         ]
       }
     ],
-    "Stop": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/substrate/stop.sh",
-            "timeout": 345600
-          }
-        ]
-      }
-    ],
     "SubagentStop": [
       {
         "matcher": "",
