@@ -171,35 +171,8 @@ Subtrate integrates with Claude Code hooks:
 - **PreCompact**: Save identity state
 - **Notification**: Send mail to User on permission prompts
 
-There is no Stop hook. Staying reachable is the agent's job, via the mail
-watcher described below.
-
-## Mail Watcher
-
-`substrate watch` blocks until mail arrives, then exits with a digest. Run
-in the background, its exit wakes you, so you can sit idle without polling.
-
-```bash
-substrate watch --session-id "$CLAUDE_SESSION_ID" --project "$PWD" --timeout 25m
-```
-
-Run it with the Bash tool's `run_in_background: true`. Check whether one is
-already armed with `substrate watch --check --session-id "$CLAUDE_SESSION_ID"`.
-
-**Keep one armed for the whole session, until the user says to stop.**
-
-- Arm it at session start (the SessionStart hook prompts for this) and after
-  every compaction, since background tasks die with the process.
-- Re-arm it after each wake, once you have handled the mail. A watcher that
-  exited 0 with a re-arm line, or on timeout with no mail, still needs
-  re-arming.
-- Always pass a bounded `--timeout` (25m). Claude Code kills background tasks
-  at 30 minutes, and an unbounded watcher dies as exit 130 and leaves you
-  watcher-less.
-- Arming does not end your turn. Keep working on the current task.
-- Stop re-arming only when the user says to ("stop watching", "turn off the
-  watcher", or similar). Then do not re-arm until they ask again. Subagents
-  do not arm their own.
+There is no Stop hook, and no hook arms the mail watcher. Staying reachable
+is the agent's job: run `/substrate-inbox` to arm the watcher and keep it armed.
 
 ## Plan Mode Integration
 

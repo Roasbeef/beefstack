@@ -55,22 +55,3 @@ result=$(substrate poll "${agent_args[@]}" --format context --quiet \
 if [ -n "$result" ]; then
     echo "$result"
 fi
-
-# Instruct the agent to arm the mail watcher. Background tasks die with
-# the Claude Code process, so every new session needs a fresh watcher.
-# Skip the instruction if one is somehow already armed for this agent.
-# Array form prevents word-splitting of odd session IDs.
-#
-# The timeout is mandatory in the instruction: Claude Code kills
-# background tasks after 30 minutes, and a watcher told to wait forever
-# dies as exit 130 ("do not re-arm") instead of exiting cleanly, which
-# leaves the session watcher-less. The bounded timeout makes the watcher
-# exit 0 with a re-arm line before the harness kill, so the wake cycle
-# stays self-describing. No Stop hook enforces this; the substrate skill
-# tells the agent to keep re-arming until told otherwise. The value matches the CLI's WatchRearmTimeout constant; keep the two in
-# agreement when either changes.
-if [ "$is_codex" != "true" ] && \
-    ! substrate watch --check "${agent_args[@]}" >/dev/null 2>&1; then
-    echo ""
-    echo "[Subtrate Watch] Arm your mail watcher: run \`substrate watch --session-id ${session_id:-\$CLAUDE_SESSION_ID} --project '${project_dir}' --timeout 25m\` via the Bash tool with run_in_background set to true. It blocks until mail arrives or the timeout expires, then exits with a digest, which wakes you automatically. Re-arm it after handling each wake."
-fi
