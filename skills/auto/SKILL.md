@@ -59,7 +59,13 @@ minutes here.
    an invariant (round trip, idempotency, equivalence with a simple reference),
    or a differential test against the old implementation for a rewrite or
    migration. Watch the new check fail before the change and pass after it.
-5. Record the plan with `/session-log plan "<goal>"`: exit criteria, steps with
+5. If the goal is to move a measured number rather than reach a pass or fail
+   end state (faster, smaller, more cases equal, more vectors passing), run
+   the work as `/hillclimb`. Its judge is the done-check, and its stop rule
+   (a target reached, or a plateau) is the exit criterion, reported as the
+   held-out delta. `/hillclimb`'s "Under /auto" section says which of its
+   approvals the session may make on its own.
+6. Record the plan with `/session-log plan "<goal>"`: exit criteria, steps with
    done-when checks, and a cut list of what the goal does not include.
 
 This is the one point where questions are cheap. If something only the user can
@@ -264,5 +270,6 @@ labels invented during the work, and the outcome in the first two lines.
 - `/council`: a blind panel and a judge for a fork between options.
 - `/advisor`: one consult when stuck or before a risky plan.
 - `/advisor-review`: the closing audit by a reader with a fresh context.
+- `/hillclimb`: the keep-or-revert loop for a goal stated as a number.
 - `/orchestrate`: parallel workers for independent items.
 - `/session-log`: the on-disk plan and notebook that survive compaction.
