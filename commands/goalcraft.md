@@ -153,3 +153,15 @@ Then use `AskUserQuestion` to offer:
   output, `git status`) over ones that require Claude to remember to print proof.
 - A bounded goal is almost always better than an open-ended one — recommend a
   turn or time clause unless the user explicitly wants it to run until done.
+- `/goal` and `/auto` do different jobs and pair well. `/goal` is the harness
+  check that re-prompts until the condition holds. `/auto` tells the
+  model how to behave inside those turns: how to plan, verify, settle its own
+  decisions, and when a stop is warranted. For a long unattended run, mention
+  the pairing when presenting the string: set the goal, then start the work
+  with `/auto <the same end state>`. The end state and check written here are
+  the exit criteria `/auto` asks for in its first step, so hand them over as
+  they are; `/auto` should not have to re-derive them.
+- A goal whose only proof is a test the same run can edit is weak. When the
+  check is a test suite, add a constraint clause that the tests defining the
+  end state are not deleted, skipped, or loosened, which matches the rule
+  `/auto` works under.

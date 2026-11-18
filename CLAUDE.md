@@ -62,6 +62,13 @@ Decide **who** to ask before deciding what to do.
 
 Don't conflate the three channels.
 
+**Under `/auto`** I may be away, so a preference or scope call does not stop
+the work. Make it provisionally as that skill describes: pick the option that
+is easiest to undo, keep it in its own commit, record it, and list it in the
+final report. Two things stay as they are. A failing test that the goal did not
+ask to change is not removed, skipped, or loosened. Pushing, opening a PR, and
+deleting anything git cannot restore still wait for me.
+
 # Parallel Work: /orchestrate
 
 When a task splits into independent items (a multi-file refactor, N similar
