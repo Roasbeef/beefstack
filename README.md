@@ -127,6 +127,8 @@ graph TB
         E1[advisor]
         E2[advisor-review]
         E3[orchestrate]
+        E4[council]
+        E5[auto]
     end
 
     subgraph Conventions["Repo conventions"]
@@ -172,7 +174,7 @@ graph TB
     class W1,W2,W3 writing
     class R1,R2,R3,R4,R5 review
     class T1,T2,T3 testing
-    class E1,E2,E3 escalation
+    class E1,E2,E3,E4,E5 escalation
     class C1,C2,C3 conventions
     class D1,D2,D3,D4 domain
     class Sub,Ses,Hooks infra
@@ -223,7 +225,9 @@ rather than from `skills/`, and together they are the most-used review path here
 |-------|-------------|
 | `advisor` | Consult a stronger model on a judgment call from a cheaper session |
 | `advisor-review` | Final adversarial audit of finished work |
-| `orchestrate` | Expensive planner decomposes, cheap workers execute in parallel, planner synthesizes |
+| `orchestrate` | Expensive planner decomposes, cheap workers execute in parallel and report evidence, planner synthesizes |
+| `council` | Blind seats weigh a fork between options through separate lenses, a judge who never sees the caller's preference picks one |
+| `auto` | Work toward a goal unattended: runnable exit criteria, verified steps, self-settled decisions, stops only when done or truly blocked |
 
 ### Repo conventions
 

@@ -1,6 +1,6 @@
 ---
 name: advisor-review
-description: "Final adversarial audit of finished work by one top-tier model (Fable 5 or Opus 4.8), in a single report-only pass across three axes: verify the load-bearing invariants (especially any you could NOT run locally), simplify without losing properties, and hunt for live variants of the bug shapes just fixed. You then verify each finding and act. Use as the closing gate on a substantive or risky change before calling it done, especially when part of it (a systest, a migration, a concurrency path) can't be validated locally. Distinct from /advisor (decision consult), /review-loop (multi-agent fix loop), and /variant-analysis (single-pattern sweep). Invoke via /advisor-review or after finishing hard-to-verify work."
+description: "Final adversarial audit of finished work by one top-tier model (Fable 5.2 or Opus 5.5), in a single report-only pass across three axes: verify the load-bearing invariants (especially any you could NOT run locally), simplify without losing properties, and hunt for live variants of the bug shapes just fixed. You then verify each finding and act. Use as the closing gate on a substantive or risky change before calling it done, especially when part of it (a systest, a migration, a concurrency path) can't be validated locally. Distinct from /advisor (decision consult), /review-loop (multi-agent fix loop), and /variant-analysis (single-pattern sweep). Invoke via /advisor-review or after finishing hard-to-verify work."
 argument-hint: "[<what to review: branch / commit-range / the change you just made>] [--tier=fable|opus]"
 allowed-tools:
   - Agent
@@ -14,7 +14,7 @@ allowed-tools:
 
 # Advisor Review
 
-A single top-tier model (Fable 5 or Opus 4.8) does one focused, adversarial pass
+A single top-tier model (Fable 5.2 or Opus 5.5) does one focused, adversarial pass
 over work you have just finished, and reports. You stay the author: you verify
 each finding against the code and decide what to act on. This is the closing
 gate on a substantive change, run *before* you tell the user it's done.

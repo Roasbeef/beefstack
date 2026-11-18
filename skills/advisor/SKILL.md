@@ -1,6 +1,6 @@
 ---
 name: advisor
-description: "On-demand consultation of a higher-tier model (Opus 4.8 or Fable 5) from a cheaper executor session. Emulates the native advisor-tool pattern in Claude Code: keep the main loop on a cheap model (Sonnet 5) and call the expensive model rarely, via a focused consultation packet, for a plan/decision/'what am I missing' — not for code. Use when the executor is stuck, before committing to a plan, after repeated failed attempts at the same fix, or before a risky/irreversible change. Invoked via /advisor or when the executor recognizes a consult checkpoint."
+description: "On-demand consultation of a higher-tier model (Opus 5.5 or Fable 5.2) from a cheaper executor session. Emulates the native advisor-tool pattern in Claude Code: keep the main loop on a cheap model (Sonnet 5.5) and call the expensive model rarely, via a focused consultation packet, for a plan/decision/'what am I missing' — not for code. Use when the executor is stuck, before committing to a plan, after repeated failed attempts at the same fix, or before a risky/irreversible change. Invoked via /advisor or when the executor recognizes a consult checkpoint."
 argument-hint: "[--tier=opus|fable] [<the specific question or decision you need help with>]"
 allowed-tools:
   - Task
@@ -18,7 +18,7 @@ Emulate the [advisor-tool pattern](https://platform.claude.com/docs/en/agents-an
 
 The whole value proposition is *token asymmetry*. It only holds if two things are true:
 
-1. **The main loop is the cheap tier** (Sonnet 5). If the session is already on Opus/Fable, every turn is paying advisor rates and this skill saves nothing — you are the advisor. Say so and stop.
+1. **The main loop is the cheap tier** (Sonnet 5.5). If the session is already on Opus/Fable, every turn is paying advisor rates and this skill saves nothing — you are the advisor. Say so and stop. The one exception is a step that is still stuck after you have reasoned it through: spawn the consult at your own tier, since a reader with a fresh context sees what you have stopped seeing.
 2. **The packet is relevant, not raw.** A sub-agent starts fresh and **cannot share the main loop's prompt cache** (caches are model-scoped), so it pays cold context on everything you send. That argues against pasting the *whole transcript* or unrelated files — not against detail. A thin packet earns thin, generic advice; the discipline is to cut what doesn't bear on the question, then be thorough with what does.
 
 ## When to consult (the trigger discipline)
@@ -28,7 +28,7 @@ The native tool gets called ~once per task because the executor decides when. En
 - **Before committing to a plan** for a non-trivial task — get the shape reviewed before you spend executor tokens building the wrong thing.
 - **After 2 failed attempts** at the same fix — you're likely missing something the cheap model can't see; ask "what am I missing?"
 - **Before a risky or irreversible change** — a schema migration, a public-API change, a delete, anything with wide blast radius.
-- **At a genuine fork** — two defensible approaches and the choice is load-bearing.
+- **At a genuine fork** — two defensible approaches and the choice is load-bearing. When the options are already named, use `/council` instead.
 
 Do **not** consult for: things you can verify by reading the code, routine edits, style questions, or anything where you'd accept your own first answer. Over-consulting is the failure mode — it turns the cheap session expensive one call at a time. Aim for ~once per task.
 
@@ -38,8 +38,8 @@ Do **not** consult for: things you can verify by reading the code, routine edits
 
 Parse `--tier=opus|fable` from arguments. If absent, choose by difficulty and say which you picked:
 
-- **`opus` (Opus 4.8, \$5/\$25 per 1M in/out)** — the default. Half of Fable's cost, still a large jump over a Sonnet executor. Right for most consults.
-- **`fable` (Fable 5, \$10/\$50)** — Anthropic's most capable model. Reserve for the hardest, highest-stakes questions where Opus itself might be the thing you're unsure of.
+- **`opus` (Opus 5.5, \$5/\$25 per 1M in/out)** — the default. Half of Fable's cost, still a large jump over a Sonnet executor. Right for most consults.
+- **`fable` (Fable 5.2, \$10/\$50)** — Anthropic's most capable model. Reserve for the hardest, highest-stakes questions where Opus itself might be the thing you're unsure of.
 
 If the choice is genuinely unclear and the stakes are high, ask with `AskUserQuestion`; otherwise pick and note it in one line.
 
@@ -78,3 +78,5 @@ Summarize the advisor's guidance back into the session in a few lines — the de
 
 - Economics, price gradient, and the native benchmarks: `docs/advisor-and-orchestrate.md`.
 - The inverse pattern — an expensive planner fanning out to cheap workers — is `/orchestrate`.
+- A choice between named options, where the caller's own lean is the risk, goes to `/council`: blind seats and a judge instead of one advisor.
+- `/auto` calls this skill when a step has failed twice. On a top-tier session that consult is still worth making once reasoning it through has not unblocked the step, because the value there is the fresh context, not the tier.

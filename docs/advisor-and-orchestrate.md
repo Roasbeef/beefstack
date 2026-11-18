@@ -6,7 +6,7 @@ They are mirror images.
 
 | | `/advisor` | `/orchestrate` |
 |---|---|---|
-| Main loop | **cheap** (Sonnet 5) | expensive (Opus/Fable) |
+| Main loop | **cheap** (Sonnet 5.5) | expensive (Opus/Fable) |
 | Expensive model | called on demand, ~once/task | the planner + synthesizer, scarce by design |
 | Cheap model | the whole session | the worker fleet, abundant |
 | Shape | cheap executor → expensive advisor | expensive planner → cheap workers |
@@ -16,10 +16,10 @@ The price gradient that makes either worth doing (per 1M tokens, in/out):
 
 | Tier | In | Out |
 |---|---|---|
-| Fable 5 | $10 | $50 |
-| Opus 4.8 | $5 | $25 |
-| Sonnet 5 | $3 | $15 ($2/$10 intro → 2026-08-31) |
-| Haiku 4.5 | $1 | $5 |
+| Fable 5.2 | $10 | $50 |
+| Opus 5.5 | $5 | $25 |
+| Sonnet 5.5 | $3 | $15 |
+| Haiku 5.5 | $1 | $5 |
 
 ---
 
@@ -27,7 +27,7 @@ The price gradient that makes either worth doing (per 1M tokens, in/out):
 
 ### The setup that makes it pay off
 
-`/advisor` only saves anything if the **session's main loop is Sonnet 5**. Run the working session on Sonnet, and let `/advisor` reach up to Opus 4.8 or Fable 5 at a few checkpoints. If the session is already on Opus/Fable, every turn is paying advisor rates and the skill saves nothing — you *are* the advisor.
+`/advisor` only saves anything if the **session's main loop is Sonnet 5.5**. Run the working session on Sonnet, and let `/advisor` reach up to Opus 5.5 or Fable 5.2 at a few checkpoints. If the session is already on Opus/Fable, every turn is paying advisor rates and the skill saves nothing — you *are* the advisor.
 
 Set the session model with `/model` (or launch Claude Code with Sonnet) before starting real work you expect to consult on.
 
@@ -64,7 +64,7 @@ Spawn with `subagent_type: "general-purpose"` and `run_in_background: true` — 
 /advisor --tier=fable <question>  # force the top tier for a hard call
 ```
 
-Tier is chosen per invocation: Opus 4.8 by default (half of Fable's cost, still a large jump over a Sonnet executor); Fable 5 for the hardest, highest-stakes questions.
+Tier is chosen per invocation: Opus 5.5 by default (half of Fable's cost, still a large jump over a Sonnet executor); Fable 5.2 for the hardest, highest-stakes questions.
 
 ---
 
@@ -72,7 +72,7 @@ Tier is chosen per invocation: Opus 4.8 by default (half of Fable's cost, still 
 
 ### The shape
 
-A high-intelligence planner (Opus/Fable) decomposes the task into independent work items; a fleet of **Sonnet 5** workers does the token-heavy execution in parallel; a thin synthesis pass stitches the results. Most tokens are generated at the worker rate. The `Workflow` tool maps almost 1:1 — it takes a per-agent `model` override — so the skill is mostly about setting tiers and keeping the expensive stages thin.
+A high-intelligence planner (Opus/Fable) decomposes the task into independent work items; a fleet of **Sonnet 5.5** workers does the token-heavy execution in parallel; a thin synthesis pass stitches the results. Most tokens are generated at the worker rate. The `Workflow` tool maps almost 1:1 — it takes a per-agent `model` override — so the skill is mostly about setting tiers and keeping the expensive stages thin.
 
 Unlike `/advisor`, this works from **any main-loop model**, because it keeps the expensive model scarce by construction (one planning pass, one synthesis pass) regardless of what the session runs on.
 
@@ -81,6 +81,12 @@ Unlike `/advisor`, this works from **any main-loop model**, because it keeps the
 ### The rule that matters
 
 **Keep the expensive stages thin.** The planner should emit a compact list of independent work items, not prose. If the planner or synthesizer is doing token-heavy *reading*, you've mis-sliced it — that work belongs in a Sonnet worker. And **don't fan out what you haven't scoped**: discover the work-list inline first (list the files, find the call sites, scope the diff), then orchestrate over it, so the planner operates on a known shape instead of guessing.
+
+### Briefs and evidence
+
+A worker knows only its brief, so the template carries three things to every worker: the task, a shared `context` string the main loop writes once (constraints, conventions, scouting facts, verify commands), and the item's own `spec` and `done` check. On an Opus or Fable session the main loop writes the items itself and the Plan phase is skipped, because the session already holds the context a fresh planner agent would lack.
+
+Each worker reports a `status`, the check it ran with the actual result, and what it could not verify. The workflow returns the items that did not finish as `incomplete`, computed in code and not left to the synthesizer. The fan-out is finished only when the main loop has run the combined check over the merged result, since each worker verified its own item alone.
 
 ### Usage
 
@@ -94,7 +100,20 @@ Defaults: Opus planner/synthesizer, Sonnet workers. Reach for Fable as planner o
 
 ---
 
+## `/council` and `/auto` — decisions and autonomy
+
+These two are not cost arbitrage. They build on the same sub-agent mechanics for a different purpose.
+
+`/council` settles a load-bearing choice between named options. Three seats, each blind to the others and each holding one lens (simplicity, risk, fit to the goal), read the code and return a ballot with evidence. A judge who sees the packet and the ballots, and never the caller's preference, picks one. The caller then checks the evidence the verdict rests on before acting. It differs from `/advisor` in what it removes: `/advisor` supplies a stronger reader, `/council` takes the caller's own lean out of the weighing. It costs four agents, so it is for real forks, about two per task at most. The logic lives in `skills/council/workflow/council.js`.
+
+`/auto` is the mode for working toward a goal unattended. It pins the goal to runnable exit criteria, keeps the plan on disk with `/session-log`, verifies each step with evidence, and settles its own decisions through a fixed ladder: check a fact, decide a cheap call, `/council` for a fork, `/advisor` after two failed attempts. It stops only when the goal is verified, when nothing can move without the user, or at an outward-facing or irreversible action. It closes with `/advisor-review` and a report written for a reader with no context. Like `/orchestrate`, it sets `disable-model-invocation: true`, so only the user starts it. It pairs with `/goal`: `/goal` re-prompts from the harness until its condition holds, `/auto` governs behavior inside them, and `/goalcraft` writes the condition both share.
+
+The text of both follows Anthropic's prompting guides for Fable 5.2 and Opus 5.5 (name the early stops to avoid and the stops that are wanted, list the routine steps that need no approval, state what a subagent costs) and the Claude Code team's notes on verification (run the change, cheap checks first, a change cannot modify the check that judges it, three failed rounds goes to a human).
+
 ## Choosing between them
+
+- **A goal to finish without supervision** → `/auto`, which reaches for the others at the right points.
+- **A fork between defensible options** → `/council`.
 
 - **One thread of work, occasionally stuck** → `/advisor`. You're doing the work; you just want a course-correction at the hard moments.
 - **The task decomposes into parallel, independent pieces** → `/orchestrate`. Research sweeps, multi-file migrations, audits — anything where N workers can run blind to each other.
