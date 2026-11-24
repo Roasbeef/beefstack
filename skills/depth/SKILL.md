@@ -2,7 +2,6 @@
 name: depth
 description: "Rewrites a task so it is done the way a field-leading professional would do it: starting from the rawest material instead of a digested summary, using the field's real instruments (profilers, byte counters, statistical models, fuzzers, model checkers, primary sources) instead of its vocabulary, aiming at an unreasonable but measurable target paired with a must-not-regress guard, reproducing the load-bearing belief from raw data before building on it, and ending at a judge other than the model. The depth axis from Felix Rieseberg's 'How to be more ambitious'. Use when the task is already the right task but must be executed very well, when there is raw data or tooling beneath the stated task, or when a result needs to hold up to an expert. Invoked via /depth or from /ambition."
 argument-hint: "[<task text>|@file|#issue] [--target=<number+unit>]"
-disable-model-invocation: true
 allowed-tools:
   - Read
   - Grep
